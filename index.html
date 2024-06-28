@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AeroLogger - Log Your Aircraft Spots</title>
+    <title>AeroLogger</title>
+    <link rel="icon" type="image/png" href="AeroLogger_Logo.png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -250,6 +251,7 @@
 
         .edit-btn,
         #viewPhotosBtn,
+        #exportSingleLogbookBtn,
         #cancelEditBtn {
             background-color: #fefefe;
             color: #0984A2;
@@ -389,6 +391,7 @@
                     <input type="password" id="loginPassword" name="password" required>
                     <input type="submit" value="Login" class="login-btn">
                 </form>
+                <p id="loginErrorMessage" style="color: red; display: none;"></p> <!-- Add this line -->
                 <p>Don't have an account? <a href="#" id="signupLink">Sign up here</a></p>
                 <p><a href="#" id="forgotPasswordLink">Forgot Password?</a></p>
                 <p><a href="#" id="resendVerificationLink">Resend Verification Email</a></p>
@@ -518,6 +521,7 @@
             <div class="button-row">
                 <button type="button" class="delete-btn" id="deleteSpotBtn">Delete</button>
                 <button type="button" id="viewPhotosBtn">View Photos</button>
+                <button type="button" id="exportSingleLogbookBtn">Export Logbook</button>
             </div>
         </div>
     </div>
@@ -626,6 +630,15 @@
                 })
                 .catch(error => {
                     console.error("Error logging in: ", error);
+                    const loginErrorMessage = document.getElementById('loginErrorMessage');
+                    if (error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
+                        loginErrorMessage.textContent = 'Invalid email or password. Please try again.';
+                    } else if (error.code === "auth/too-many-requests"){
+                        loginErrorMessage.textContent = 'Too many failed login attempts. Please try again later or reset your password.';
+                    } else {
+                        loginErrorMessage.textContent = 'An error occurred. Please try again later.';
+                    }
+                    loginErrorMessage.style.display = 'block'; // Show the error message
                 });
         });
 
@@ -859,91 +872,234 @@
         document.getElementById('exportAllBtn').addEventListener('click', exportAll);
 
         async function exportLogbooks() {
-            const userId = auth.currentUser.uid;
-            const zip = new JSZip();
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
 
-            const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
-            logbooksSnapshot.forEach(doc => {
-                const logbook = doc.data();
-                const headerText = logbook.entryName;
-                const content = JSON.stringify(logbook, null, 2);
-                zip.file(`${headerText}.txt`, content);
-            });
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                logbooksSnapshot.forEach(doc => {
+                    const logbook = doc.data();
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
 
-            zip.generateAsync({ type: 'blob' }).then(function (content) {
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${logbook.entryName}.txt`, formattedContent.trim());
+                });
+
+                const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'logbooks.zip');
-            });
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        document.getElementById('exportSingleLogbookBtn').onclick = function () {
+            const spotId = document.getElementById('modalSpotId').value;
+            exportSingleLogbook(spotId);
+        };
+
+        async function exportSingleLogbook(logbookId) {
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+                const logbookDoc = await logbookDocRef.get();
+                if (logbookDoc.exists) {
+                    const logbook = logbookDoc.data();
+                    const headerText = logbook.entryName;
+
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
+
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${headerText}.txt`, formattedContent.trim());
+
+                    const galleriesSnapshot = await logbookDocRef.collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        const photoSnapshot = await logbookDocRef.collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+                    }
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, `${logbookDoc.data().entryName}.zip`);
+            } finally {
+                hideSpinner();
+            }
         }
 
         async function exportGalleries() {
-            const userId = auth.currentUser.uid;
-            const zip = new JSZip();
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
 
-            const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
-            for (const logbookDoc of logbooksSnapshot.docs) {
-                const logbook = logbookDoc.data();
-                const logbookId = logbookDoc.id;
-                const headerText = logbook.entryName;
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                for (const logbookDoc of logbooksSnapshot.docs) {
+                    const logbook = logbookDoc.data();
+                    const logbookId = logbookDoc.id;
+                    const headerText = logbook.entryName;
 
-                const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
-                for (const galleryDoc of galleriesSnapshot.docs) {
-                    const gallery = galleryDoc.data();
-                    const galleryHeader = gallery.title;
-                    const folder = zip.folder(`${headerText}/${galleryHeader}`);
+                    const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
 
-                    // Get photos in each gallery
-                    const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
-                    for (const photoDoc of photoSnapshot.docs) {
-                        const photo = photoDoc.data();
-                        const photoUrl = photo.photoUrl;
-                        const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
-                        const response = await fetch(photoUrl);
-                        const blob = await response.blob();
-                        folder.file(photoName, blob); // Use original file name
+                        // Get photos in each gallery
+                        const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
                     }
                 }
-            }
 
-            zip.generateAsync({ type: 'blob' }).then(function (content) {
+                const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'galleries.zip');
-            });
+            } finally {
+                hideSpinner();
+            }
         }
 
-
         async function exportAll() {
-            const userId = auth.currentUser.uid;
-            const zip = new JSZip();
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
 
-            const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
-            for (const logbookDoc of logbooksSnapshot.docs) {
-                const logbook = logbookDoc.data();
-                const logbookId = logbookDoc.id;
-                const headerText = logbook.entryName;
-                const content = JSON.stringify(logbook, null, 2);
-                zip.file(`${headerText}.txt`, content);
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                for (const logbookDoc of logbooksSnapshot.docs) {
+                    const logbook = logbookDoc.data();
+                    const logbookId = logbookDoc.id;
+                    const headerText = logbook.entryName;
 
-                const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
-                for (const galleryDoc of galleriesSnapshot.docs) {
-                    const gallery = galleryDoc.data();
-                    const galleryHeader = gallery.title;
-                    const folder = zip.folder(`${headerText}/${galleryHeader}`);
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
 
-                    // Get photos in each gallery
-                    const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
-                    for (const photoDoc of photoSnapshot.docs) {
-                        const photo = photoDoc.data();
-                        const photoUrl = photo.photoUrl;
-                        const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
-                        const response = await fetch(photoUrl);
-                        const blob = await response.blob();
-                        folder.file(photoName, blob); // Use original file name
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${logbook.entryName}.txt`, formattedContent.trim());
+
+                    const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        // Get photos in each gallery
+                        const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
                     }
                 }
-            }
 
-            zip.generateAsync({ type: 'blob' }).then(function (content) {
+                const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'all_data.zip');
-            });
+            } finally {
+                hideSpinner();
+            }
         }
 
         function generateEntryName(logbook) {
@@ -1596,10 +1752,10 @@
 
                     // Check if the logbook has any other galleries
                     const remainingGalleries = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
-                        if (remainingGalleries.empty) {
-                            // If no other galleries exist, delete the logbook
-                            await deleteLogbook(logbookId, false);
-                        }
+                    if (remainingGalleries.empty) {
+                        // If no other galleries exist, delete the logbook
+                        await deleteLogbook(logbookId, false);
+                    }
 
                     // Reload the galleries
                     loadAllGalleries(userId);
