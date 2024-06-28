@@ -633,7 +633,7 @@
                     const loginErrorMessage = document.getElementById('loginErrorMessage');
                     if (error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
                         loginErrorMessage.textContent = 'Invalid email or password. Please try again.';
-                    } else if (error.code === "auth/too-many-requests"){
+                    } else if (error.code === "auth/too-many-requests") {
                         loginErrorMessage.textContent = 'Too many failed login attempts. Please try again later or reset your password.';
                     } else {
                         loginErrorMessage.textContent = 'An error occurred. Please try again later.';
@@ -1376,7 +1376,7 @@
 
         function subscribeToGalleries(userId, logbookId) {
             db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries')
-                .orderBy('createdAt', 'asc')
+                .orderBy('createdAt', 'desc')
                 .onSnapshot(gallerySnapshot => {
                     const galleriesContainer = document.getElementById('galleries');
                     galleriesContainer.innerHTML = ''; // Clear existing galleries to prevent duplicates
@@ -1384,6 +1384,11 @@
                         addGallery(galleryDoc, logbookId);
                         subscribeToPhotos(userId, logbookId, galleryDoc.id); // Subscribe to photos within this gallery
                     });
+                    // Automatically open the first gallery after loading
+                    const firstGallery = galleriesContainer.querySelector('.gallery-container');
+                    if (firstGallery) {
+                        firstGallery.classList.add('open');
+                    }
                 });
         }
 
@@ -1821,6 +1826,7 @@
             document.getElementById('viewPhotosBtn').onclick = function () {
                 const spotId = document.getElementById('modalSpotId').value;
                 showGallery(auth.currentUser.uid, spotId);
+                document.getElementById('spotDetailsModal').style.display = 'none'; // Close the details window
             };
 
             document.getElementById('editDetailsBtn').onclick = function () {
