@@ -1388,10 +1388,7 @@
                     // Automatically toggle open the first gallery after loading
                     const firstGallery = galleriesContainer.querySelector('.gallery-container');
                     if (firstGallery) {
-                        const folder = firstGallery.querySelector('.gallery-folder');
-                        if (folder) {
-                            toggleGallery(folder);
-                        }
+                        firstGallery.classList.add('open');
                     }
                 });
         }
