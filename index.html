@@ -263,6 +263,7 @@
 
         .edit-btn:hover,
         #viewPhotosBtn:hover,
+        #exportSingleLogbookBtn:hover,
         #cancelEditBtn:hover {
             background-color: #e6e6e6;
         }
@@ -355,6 +356,29 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            bottom: 10px;
+            width: 100%;
+        }
+
+        #prevPhoto,
+        #nextPhoto {
+            background-color: #0984A2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #prevPhoto:hover,
+        #nextPhoto:hover {
+            background-color: #07668C;
         }
     </style>
 
@@ -557,6 +581,10 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <img id="largeImage" src="" alt="Large Image" style="width:100%; height:100%; object-fit:contain;">
+            <div class="nav-buttons">
+                <button id="prevPhoto">&larr; Back</button>
+                <button id="nextPhoto">Forward &rarr;</button>
+            </div>
         </div>
     </div>
     <div class="spinner" id="loadingSpinner"></div>
@@ -1634,8 +1662,11 @@
                     }
 
                     galleryPhotosDiv.innerHTML = ''; // Clear existing photos to prevent duplicates
+                    const photoUrls = [];
                     photoSnapshot.forEach(photoDoc => {
                         const photo = photoDoc.data();
+                        photoUrls.push(photo.photoUrl);
+
                         const imgContainer = document.createElement('div');
                         imgContainer.className = 'gallery-photo-container';
                         const img = document.createElement('img');
@@ -1643,7 +1674,7 @@
                         img.className = 'gallery-photo';
                         img.alt = 'Gallery Photo';
                         img.onclick = function () {
-                            openImageModal(photo.photoUrl);
+                            openImageModal(photo.photoUrl, photoUrls); // Pass the photo URLs to the modal
                         };
 
                         const deleteButton = document.createElement('button');
@@ -1659,7 +1690,6 @@
                     });
                 });
         }
-
 
         async function deletePhoto(userId, logbookId, galleryId, photoId, photoUrl) {
             // Delete photo document in Firestore
@@ -1679,12 +1709,52 @@
             galleryContainer.classList.toggle('open');
         }
 
-        function openImageModal(photoUrl) {
+        let currentPhotoIndex = 0;
+        let currentPhotoUrls = [];
+
+        function openImageModal(photoUrl, galleryPhotos) {
             const imageModal = document.getElementById('imageModal');
             const largeImage = document.getElementById('largeImage');
             largeImage.src = photoUrl;
             imageModal.style.display = 'block';
+
+            currentPhotoUrls = galleryPhotos;
+            currentPhotoIndex = currentPhotoUrls.indexOf(photoUrl);
+
+            updateNavigationButtons();
         }
+
+        function showNextPhoto() {
+            currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotoUrls.length;
+            document.getElementById('largeImage').src = currentPhotoUrls[currentPhotoIndex];
+            updateNavigationButtons();
+        }
+
+        function showPreviousPhoto() {
+            currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotoUrls.length) % currentPhotoUrls.length;
+            document.getElementById('largeImage').src = currentPhotoUrls[currentPhotoIndex];
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            const prevButton = document.getElementById('prevPhoto');
+            const nextButton = document.getElementById('nextPhoto');
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (document.getElementById('imageModal').style.display === 'block') {
+                if (event.key === 'ArrowRight') {
+                    showNextPhoto();
+                } else if (event.key === 'ArrowLeft') {
+                    showPreviousPhoto();
+                }
+            }
+        });
+
+        document.getElementById('nextPhoto').onclick = showNextPhoto;
+        document.getElementById('prevPhoto').onclick = showPreviousPhoto;
 
         async function deleteLogbook(logbookId, confirmDeletion = true) {
             const userId = auth.currentUser.uid;
@@ -1845,6 +1915,13 @@
             document.getElementById('addSpotBtn').onclick = function () {
                 addSpotModal.style.display = "block";
             };
+
+            // Ensure the signup form is hidden when the login form is visible
+            const loginForm = document.querySelector('.login-form');
+            const signupForm = document.querySelector('.signup-form');
+            if (loginForm && signupForm) {
+                signupForm.style.display = 'none';
+            }
         });
 
 
