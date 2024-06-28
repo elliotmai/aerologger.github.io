@@ -1385,9 +1385,10 @@
                         subscribeToPhotos(userId, logbookId, galleryDoc.id); // Subscribe to photos within this gallery
                     });
 
-                    const firstGalleryFolder = galleriesContainer.querySelector('.gallery-folder');
-                    if (firstGalleryFolder) {
-                        firstGalleryFolder.click(); // Simulate a click on the first gallery folder
+                    // Automatically toggle open the first gallery after loading
+                    const firstGalleryContainer = galleriesContainer.querySelector('.gallery-container');
+                    if (firstGalleryContainer) {
+                        toggleGallery(firstGalleryContainer.querySelector('.gallery-folder')); // Call toggleGallery function
                     }
                 });
         }
