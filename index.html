@@ -736,17 +736,6 @@
                 });
         });
 
-
-        document.getElementById('signupLink').onclick = function () {
-            loginPage.style.display = 'none';
-            signupPage.style.display = 'flex';
-        }
-
-        document.getElementById('loginLink').onclick = function () {
-            signupPage.style.display = 'none';
-            loginPage.style.display = 'flex';
-        }
-
         document.getElementById('spotForm').addEventListener('submit', async function (event) {
             event.preventDefault();
             showSpinner();
@@ -1891,7 +1880,11 @@
             document.getElementById('viewPhotosBtn').onclick = function () {
                 const spotId = document.getElementById('modalSpotId').value;
                 showGallery(auth.currentUser.uid, spotId);
-                document.getElementById('spotDetailsModal').style.display = 'none'; // Close the details window
+                const galleryContainer = document.querySelector(`.gallery-container[data-logbook-id="${spotId}"]`);
+                if (galleryContainer) {
+                    toggleGallery(galleryContainer.querySelector('.gallery-folder'));
+                }
+                spotDetailsModal.style.display = "none";
             };
 
             document.getElementById('editDetailsBtn').onclick = function () {
@@ -1919,11 +1912,17 @@
             // Ensure the signup form is hidden when the login form is visible
             const loginForm = document.querySelector('.login-form');
             const signupForm = document.querySelector('.signup-form');
-            if (loginForm && signupForm) {
-                signupForm.style.display = 'none';
+
+            document.getElementById('signupLink').onclick = function () {
+                loginPage.style.display = 'none';
+                signupPage.style.display = 'flex';
+            }
+
+            document.getElementById('loginLink').onclick = function () {
+                signupPage.style.display = 'none';
+                loginPage.style.display = 'flex';
             }
         });
-
 
         // Load user account details
         function loadAccountDetails() {
