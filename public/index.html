@@ -13,6 +13,7 @@
             color: #E7995D;
             margin: 0;
             padding: 0;
+            transition: margin-left .5s;
         }
 
         header {
@@ -20,6 +21,62 @@
             color: white;
             padding: 1em 0;
             text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #hamburger-menu {
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+            position: absolute;
+            left: 5%;
+            display: none;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #122835;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 22px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #0984A2;
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidebar {
+                padding-top: 15px;
+            }
+
+            .sidebar a {
+                font-size: 18px;
+            }
         }
 
         #spotDetailsDisplay {
@@ -57,7 +114,9 @@
         .gallery,
         .account,
         .login-page,
-        .signup-page {
+        .signup-page,
+        .signup-form,
+        .public-gallery {
             display: none;
         }
 
@@ -76,8 +135,8 @@
             margin: 0 0 10px 0;
         }
 
-        .spot-widget h3:hover {
-            text-decoration: underline;
+        .spot-widget:hover {
+            transform: scale(1.01);
         }
 
         .modal {
@@ -144,15 +203,6 @@
             border-radius: 5px;
         }
 
-        .profile-pic {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: #ccc;
-            display: block;
-            margin: 10px auto;
-        }
-
         .gallery-container {
             margin: 20px 0;
         }
@@ -165,6 +215,10 @@
             cursor: pointer;
         }
 
+        .gallery-folder:hover {
+            transform: scale(1.01);
+        }
+
         .gallery-photos {
             display: none;
             grid-template-columns: repeat(4, 1fr);
@@ -174,7 +228,15 @@
 
         .gallery-photo {
             width: 100%;
+            height: auto;
+            object-fit: cover;
             border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-photo:hover {
+            transform: scale(1.05);
         }
 
         .gallery-container.open .gallery-photos {
@@ -204,6 +266,32 @@
 
         .gallery-container.open .gallery-actions {
             display: block;
+        }
+
+        .public-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            /* Adjust the gap between photos as needed */
+            padding: 10px;
+        }
+
+        .public-gallery-grid img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            /* Ensure the image covers the grid item without distortion */
+            border-radius: 5px;
+            /* Optional: Adds slight rounding to the image corners */
+            cursor: pointer;
+            /* Change cursor to pointer on hover */
+            transition: transform 0.2s;
+            /* Optional: Smooth transition for scaling effect */
+        }
+
+        .public-gallery-grid img:hover {
+            transform: scale(1.05);
+            /* Optional: Slight scaling effect on hover */
         }
 
         .login-page,
@@ -236,7 +324,18 @@
         }
 
         .delete-btn,
-        .delete-gallery {
+        .delete-gallery,
+        #publishPhoto {
+            background-color: #E7995D;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #deletePublicImage {
+            display: none;
             background-color: #E7995D;
             color: white;
             border: none;
@@ -366,7 +465,9 @@
         }
 
         #prevPhoto,
-        #nextPhoto {
+        #nextPhoto,
+        #prevPublicPhoto,
+        #nextPublicPhoto {
             background-color: #0984A2;
             color: white;
             border: none;
@@ -377,8 +478,14 @@
         }
 
         #prevPhoto:hover,
-        #nextPhoto:hover {
+        #nextPhoto:hover,
+        #prevPublicPhoto:hover,
+        #nextPublicPhoto:hover {
             background-color: #07668C;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 
@@ -390,21 +497,28 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-.js/2.0.5/FileSaver.min.js"></script>
+    <script src="/config.js"></script>
 </head>
 
 <body>
     <header>
         <h1>AeroLogger - Log Your Aircraft Spots</h1>
+        <div id="hamburger-menu" onclick="toggleSidebar()">&#9776;</div>
     </header>
-    <nav>
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="toggleSidebar()">&times;</a>
         <a href="#" id="logbookNav">Logbook</a>
         <a href="#" id="galleryNav">Gallery</a>
+        <a href="#" id="publicGalleryNav">Public Gallery</a>
         <a href="#" id="accountNav">Account</a>
-    </nav>
-    <div class="container">
+        <a href="#" id="logoutBtn">Logout</a>
+    </div>
+    <div id="overlay"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 0;">
+    </div>
+    <div class="container hidden">
         <div class="login-page">
             <div class="login-form">
                 <h2>Login</h2>
@@ -413,6 +527,10 @@
                     <input type="email" id="loginEmail" name="email" required>
                     <label for="password">Password:</label>
                     <input type="password" id="loginPassword" name="password" required>
+                    <div style="padding-bottom: 5px;">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <label for="rememberMe">Remember Me</label>
+                    </div>
                     <input type="submit" value="Login" class="login-btn">
                 </form>
                 <p id="loginErrorMessage" style="color: red; display: none;"></p> <!-- Add this line -->
@@ -422,7 +540,7 @@
 
             </div>
         </div>
-        <div class="signup-page">
+        <div class="signup-page hidden">
             <div class="signup-form">
                 <h2>Sign Up</h2>
                 <form id="signupForm">
@@ -430,17 +548,18 @@
                     <input type="text" id="signupFirstName" name="firstName" required>
                     <label for="signupLastName">Last Name:</label>
                     <input type="text" id="signupLastName" name="lastName" required>
-                    <label for="email">Email:</label>
+                    <label for="signupUsername">Username:</label>
+                    <input type="text" id="signupUsername" name="username" required>
+                    <label for="signupEmail">Email:</label>
                     <input type="email" id="signupEmail" name="email" required>
-                    <label for="password">Password:</label>
+                    <label for="signupPassword">Password:</label>
                     <input type="password" id="signupPassword" name="password" required>
                     <input type="submit" value="Sign Up" class="signup-btn">
                 </form>
-
                 <p>Already have an account? <a href="#" id="loginLink">Log in here</a></p>
             </div>
         </div>
-        <div class="logbook">
+        <div class="logbook hidden">
             <div class="logbook-header">
                 <input type="text" id="logbookSearchBar" placeholder="Search..." oninput="filterLogbook()">
                 <select id="logbookFilterDropdown" onchange="filterLogbook()">
@@ -453,6 +572,7 @@
                     <option value="location">By Location</option>
                     <option value="origin">By Origin</option>
                     <option value="destination">By Destination</option>
+                    <option value="notes">By Notes</option>
                 </select>
             </div>
             <button class="add-spot-btn" id="addSpotBtn">Add Spot</button>
@@ -461,7 +581,7 @@
                 <!-- Logbook entries will be added here dynamically -->
             </div>
         </div>
-        <div class="gallery">
+        <div class="gallery hidden">
             <div class="gallery-header">
                 <input type="text" id="gallerySearchBar" placeholder="Search..." oninput="filterGalleries()">
                 <select id="galleryFilterDropdown" onchange="filterGalleries()">
@@ -474,6 +594,7 @@
                     <option value="location">By Location</option>
                     <option value="origin">By Origin</option>
                     <option value="destination">By Destination</option>
+                    <option value="notes">By Notes</option>
                 </select>
             </div>
             <h2>Gallery</h2>
@@ -481,7 +602,13 @@
                 <!-- Galleries will be added here dynamically -->
             </div>
         </div>
-        <div class="account">
+        <div class="public-gallery hidden">
+            <h2>Public Gallery</h2>
+            <div class="public-gallery-grid" id="publicGalleryGrid">
+                <!-- Public photos will be dynamically added here -->
+            </div>
+        </div>
+        <div class="account hidden">
             <h2>Account</h2>
             <div class="profile-pic" id="profilePic"></div>
             <form id="accountForm">
@@ -489,6 +616,8 @@
                 <input type="text" id="firstName" name="firstName" required>
                 <label for="lastName">Last Name:</label>
                 <input type="text" id="lastName" name="lastName" required>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
                 <label for="email">Email Address:</label>
                 <input type="text" id="email" name="email" required>
                 <input type="submit" value="Update Account">
@@ -571,6 +700,8 @@
                 <input type="text" id="origin" name="origin">
                 <label for="destination">Destination:</label>
                 <input type="text" id="destination" name="destination">
+                <label for="notes">Notes:</label>
+                <textarea id="notes" name="notes"></textarea>
                 <label for="photos">Photos:</label>
                 <input type="file" id="photos" name="photos" accept="image/*" multiple>
                 <input type="submit" value="Add Spot">
@@ -581,37 +712,124 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <img id="largeImage" src="" alt="Large Image" style="width:100%; height:100%; object-fit:contain;">
+            <div id="imageDetails">
+                <!-- Entry details will be displayed here -->
+                <p id="aircraftTypeRow"><strong>Aircraft Type:</strong> <span id="aircraftType"></span></p>
+                <p id="operatorRow"><strong>Operator:</strong> <span id="operator"></span></p>
+                <p id="aircraftIdRow"><strong>Aircraft ID:</strong> <span id="aircraftId"></span></p>
+                <p id="flightNumberRow"><strong>Flight Number:</strong> <span id="flightNumber"></span></p>
+                <p id="dateSpottedRow"><strong>Date Spotted:</strong> <span id="dateSpotted"></span></p>
+                <p id="locationRow"><strong>Location:</strong> <span id="location"></span></p>
+                <p id="routeRow"><strong>Route:</strong> <span id="origin"></span> &rarr; <span id="destination"></span>
+                </p>
+                <p id="notesRow"><strong>Notes:</strong> <span id="notes"></span></p>
+            </div>
             <div class="nav-buttons">
                 <button id="prevPhoto">&larr; Back</button>
+                <button id="publishPhoto">Publish</button>
                 <button id="nextPhoto">Forward &rarr;</button>
             </div>
         </div>
     </div>
+    <div id="publicImageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="publicLargeImage" src="" alt="Large Image" style="width:100%; height:100%; object-fit:contain;">
+            <div id="publicImageDetails">
+                <!-- Entry details and username will be displayed here -->
+                <p id="publicAircraftTypeRow"><strong>Aircraft Type:</strong> <span id="publicAircraftType"></span></p>
+                <p id="publicOperatorRow"><strong>Operator:</strong> <span id="publicOperator"></span></p>
+                <p id="publicAircraftIdRow"><strong>Aircraft ID:</strong> <span id="publicAircraftId"></span></p>
+                <p id="publicFlightNumberRow"><strong>Flight Number:</strong> <span id="publicFlightNumber"></span></p>
+                <p id="publicDateSpottedRow"><strong>Date Spotted:</strong> <span id="publicDateSpotted"></span></p>
+                <p id="publicLocationRow"><strong>Location:</strong> <span id="publicLocation"></span></p>
+                <p id="publicRouteRow"><strong>Route:</strong> <span id="publicOrigin"></span> &rarr; <span
+                        id="publicDestination"></span></p>
+                <p id="publicNotesRow"><strong>Notes:</strong> <span id="publicNotes"></span></p>
+                <p><strong>Username:</strong> <span id="publicUsername"></span></p>
+            </div>
+            <div class="nav-buttons">
+                <button id="prevPublicPhoto">&larr; Back</button>
+                <button id="deletePublicImage">Delete</button>
+                <button id="nextPublicPhoto">Forward &rarr;</button>
+            </div>
+        </div>
+    </div>
+
     <div class="spinner" id="loadingSpinner"></div>
-
-
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApq0Wj12n2Gn8tjD0HJ-MsR3ON8hbh7QQ",
-            authDomain: "aerologger-ec6a6.firebaseapp.com",
-            projectId: "aerologger-ec6a6",
-            storageBucket: "aerologger-ec6a6.appspot.com",
-            messagingSenderId: "1080261936802",
-            appId: "1:1080261936802:web:59543e21bc5c2a4faab9fb",
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar.style.width === "250px") {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById("sidebar").style.width = "250px";
+            document.body.style.marginLeft = "250px";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").style.width = "0";
+            document.body.style.marginLeft = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        document.addEventListener('click', function (event) {
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("overlay");
+            if (event.target !== sidebar && !sidebar.contains(event.target) && event.target !== document.getElementById("hamburger-menu")) {
+                closeSidebar();
+            }
+        });
+
+        document.querySelectorAll('#sidebar a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        // Show the hamburger menu after login
+        function showHamburgerMenu() {
+            document.getElementById("hamburger-menu").style.display = "block";
+        }
+
+        function unsubscribeAllListeners() {
+            unsubscribeListeners.forEach(unsubscribe => unsubscribe());
+            unsubscribeListeners.length = 0; // Clear the array
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            unsubscribeAllListeners(); // Unsubscribe from all listeners
+            firebase.auth().signOut().then(() => {
+                // Sign-out successful
+                localStorage.removeItem('activeContainer'); // Clear the active container
+                document.querySelector('.login-page').style.display = 'flex';
+                document.querySelector('.logbook').style.display = 'none';
+                document.querySelector('.gallery').style.display = 'none';
+                document.querySelector('.public-gallery').style.display = 'none';
+                document.querySelector('.account').style.display = 'none';
+                document.getElementById("hamburger-menu").style.display = "none";
+            }).catch((error) => {
+                // An error happened during logout
+                console.error('Logout Error:', error);
+            });
+        });
+
         const logbookNav = document.getElementById('logbookNav');
         const galleryNav = document.getElementById('galleryNav');
+        const publicGalleryNav = document.getElementById('publicGalleryNav');
         const accountNav = document.getElementById('accountNav');
 
         const logbookSection = document.querySelector('.logbook');
         const gallerySection = document.querySelector('.gallery');
+        const publicGallerySection = document.querySelector('.public-gallery');
         const accountSection = document.querySelector('.account');
         const loginPage = document.querySelector('.login-page');
         const signupPage = document.querySelector('.signup-page');
@@ -619,27 +837,128 @@
         logbookNav.onclick = function () {
             logbookSection.style.display = 'block';
             gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'none';
             accountSection.style.display = 'none';
-        }
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isLogbookLoaded) {
+                subscribeToLogbooks(auth.currentUser.uid);
+                isLogbookLoaded = true;
+            }
+            isGalleryLoaded = false;
+            isPublicGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'logbook');
+        };
 
         galleryNav.onclick = function () {
             logbookSection.style.display = 'none';
             gallerySection.style.display = 'block';
+            publicGallerySection.style.display = 'none';
             accountSection.style.display = 'none';
-            loadAllGalleries(auth.currentUser.uid);
-        }
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isGalleryLoaded) {
+                loadAllGalleries(auth.currentUser.uid);
+                isGalleryLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isPublicGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'gallery');
+        };
+
+        publicGalleryNav.onclick = function () {
+            logbookSection.style.display = 'none';
+            gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'block';
+            accountSection.style.display = 'none';
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isPublicGalleryLoaded) {
+                loadPublicGallery();
+                isPublicGalleryLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'public-gallery');
+        };
 
         accountNav.onclick = function () {
             logbookSection.style.display = 'none';
             gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'none';
             accountSection.style.display = 'block';
-            loadAccountDetails();
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isAccountLoaded) {
+                loadAccountDetails();
+                isAccountLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isGalleryLoaded = false;
+            isPublicGalleryLoaded = false;
+            localStorage.setItem('activeContainer', 'account');
+        };
+
+
+        function hideAllSections() {
+            document.querySelector('.logbook').style.display = 'none';
+            document.querySelector('.gallery').style.display = 'none';
+            document.querySelector('.public-gallery').style.display = 'none';
+            document.querySelector('.account').style.display = 'none';
+            document.querySelector('.signup-page').style.display = 'none'; // Hide signup page
+        }
+
+        let isLogbookLoaded = false;
+        let isGalleryLoaded = false;
+        let isPublicGalleryLoaded = false;
+        let isAccountLoaded = false;
+
+        function loadActiveContainer() {
+            hideAllSections();
+            const activeContainer = localStorage.getItem('activeContainer') || 'logbook';
+            if (activeContainer === 'logbook') {
+                logbookSection.style.display = 'block';
+                if (!isLogbookLoaded) {
+                    subscribeToLogbooks(auth.currentUser.uid);
+                    isLogbookLoaded = true;
+                }
+            } else if (activeContainer === 'gallery') {
+                gallerySection.style.display = 'block';
+                if (!isGalleryLoaded) {
+                    loadAllGalleries(auth.currentUser.uid);
+                    isGalleryLoaded = true;
+                }
+            } else if (activeContainer === 'public-gallery') {
+                publicGallerySection.style.display = 'block';
+                if (!isPublicGalleryLoaded) {
+                    loadPublicGallery();
+                    isPublicGalleryLoaded = true;
+                }
+            } else if (activeContainer === 'account') {
+                accountSection.style.display = 'block';
+                if (!isAccountLoaded) {
+                    loadAccountDetails();
+                    isAccountLoaded = true;
+                }
+            }
+        }
+
+        // Remember Me feature
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+
+        // Check if user credentials are saved in localStorage
+        if (localStorage.getItem('email') && localStorage.getItem('password')) {
+            loginEmail.value = localStorage.getItem('email');
+            loginPassword.value = localStorage.getItem('password');
+            rememberMeCheckbox.checked = true;
         }
 
         document.getElementById('loginForm').addEventListener('submit', function (event) {
             event.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
 
             auth.signInWithEmailAndPassword(email, password)
                 .then(userCredential => {
@@ -647,6 +966,13 @@
 
                     // Check if email is verified
                     if (user.emailVerified) {
+                        if (rememberMe) {
+                            localStorage.setItem('email', email);
+                            localStorage.setItem('password', password);
+                        } else {
+                            localStorage.removeItem('email');
+                            localStorage.removeItem('password');
+                        }
                         loginPage.style.display = 'none';
                         signupPage.style.display = 'none';
                         logbookSection.style.display = 'block';
@@ -670,7 +996,6 @@
                 });
         });
 
-
         document.getElementById('forgotPasswordLink').addEventListener('click', function (event) {
             event.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -688,52 +1013,60 @@
             }
         });
 
-
         document.getElementById('signupForm').addEventListener('submit', function (event) {
             event.preventDefault();
+            const username = document.getElementById('signupUsername').value;
 
-            const firstNameElem = document.getElementById('signupFirstName');
-            const lastNameElem = document.getElementById('signupLastName');
-            const emailElem = document.getElementById('signupEmail');
-            const passwordElem = document.getElementById('signupPassword');
+            validateUsername(username).then(isValid => {
+                if (isValid) {
+                    event.preventDefault();
 
-            // Check if all elements are available
-            if (!firstNameElem || !lastNameElem || !emailElem || !passwordElem) {
-                console.error('One or more form elements are missing');
-                return;
-            }
+                    const firstNameElem = document.getElementById('signupFirstName');
+                    const lastNameElem = document.getElementById('signupLastName');
+                    const emailElem = document.getElementById('signupEmail');
+                    const passwordElem = document.getElementById('signupPassword');
 
-            const firstName = firstNameElem.value;
-            const lastName = lastNameElem.value;
-            const email = emailElem.value;
-            const password = passwordElem.value;
+                    // Check if all elements are available
+                    if (!firstNameElem || !lastNameElem || !emailElem || !passwordElem) {
+                        console.error('One or more form elements are missing');
+                        return;
+                    }
 
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    const user = userCredential.user;
+                    const firstName = firstNameElem.value;
+                    const lastName = lastNameElem.value;
+                    const email = emailElem.value;
+                    const password = passwordElem.value;
 
-                    // Send verification email
-                    user.sendEmailVerification().then(() => {
-                        alert('Verification email sent! Please check your inbox.');
-                    }).catch(error => {
-                        console.error("Error sending verification email:", error);
-                    });
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .then(userCredential => {
+                            const user = userCredential.user;
 
-                    // Add user data to Firestore
-                    db.collection('users').doc(user.uid).set({
-                        firstName: firstName,
-                        lastName: lastName,
-                        email: email
-                    }).then(() => {
-                        signupPage.style.display = 'none';
-                        loginPage.style.display = 'flex';
-                    }).catch(error => {
-                        console.error("Error adding user to Firestore:", error);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error signing up: ", error);
-                });
+                            // Send verification email
+                            user.sendEmailVerification().then(() => {
+                                alert('Verification email sent! Please check your inbox.');
+                            }).catch(error => {
+                                console.error("Error sending verification email:", error);
+                            });
+
+                            // Add user data to Firestore
+                            db.collection('users').doc(user.uid).set({
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email
+                            }).then(() => {
+                                signupPage.style.display = 'none';
+                                loginPage.style.display = 'flex';
+                            }).catch(error => {
+                                console.error("Error adding user to Firestore:", error);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error signing up: ", error);
+                        });
+                } else {
+                    alert('Username is already taken.');
+                }
+            });
         });
 
         document.getElementById('spotForm').addEventListener('submit', async function (event) {
@@ -750,6 +1083,7 @@
                 const location = form.location.value;
                 const origin = form.origin.value;
                 const destination = form.destination.value;
+                const notes = form.notes.value; // Get the notes value
                 const files = form.photos.files;
 
                 // Generate entryName
@@ -773,6 +1107,7 @@
                     location: location,
                     origin: origin,
                     destination: destination,
+                    notes: notes, // Add notes to the logbook details
                     entryName: entryName, // Add entryName to the logbook details
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -803,9 +1138,6 @@
                 hideSpinner();
             }
         });
-
-
-
 
         document.getElementById('deleteAccountBtn').addEventListener('click', function () {
             const user = auth.currentUser;
@@ -1255,7 +1587,6 @@
             updatePhotoCount(userId, doc.id, photoCountElement);
         }
 
-
         function addGallery(doc, logbookId) {
             const gallery = doc.data();
             const logbookDocRef = db.collection('users').doc(auth.currentUser.uid).collection('logbooks').doc(logbookId);
@@ -1276,6 +1607,7 @@
                     galleryContainer.setAttribute('data-location', logbook.location ? logbook.location.toLowerCase() : '');
                     galleryContainer.setAttribute('data-origin', logbook.origin ? logbook.origin.toLowerCase() : '');
                     galleryContainer.setAttribute('data-destination', logbook.destination ? logbook.destination.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-notes', logbook.notes ? logbook.notes.toLowerCase() : '');
                     galleryContainer.innerHTML = `
                 <div class="gallery-folder" onclick="toggleGallery(this)">
                     <h3>${entryName}</h3>
@@ -1291,34 +1623,252 @@
             `;
                     const galleries = document.getElementById('galleries');
                     galleries.insertBefore(galleryContainer, galleries.firstChild);
-
                     const addPhotoInput = galleryContainer.querySelector('.add-photo');
+
                     addPhotoInput.addEventListener('change', async function () {
                         const newFiles = Array.from(addPhotoInput.files);
                         const userId = auth.currentUser.uid;
                         const galleryId = galleryContainer.getAttribute('data-gallery-id');
                         const newPhotos = [];
 
-                        for (const file of newFiles) {
-                            const storageRef = storage.ref().child(`users/${userId}/logbooks/${logbookId}/galleries/${galleryId}/${file.name}`);
-                            await storageRef.put(file);
-                            const photoUrl = await storageRef.getDownloadURL();
-                            newPhotos.push(photoUrl);
-                            await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos').add({
-                                photoUrl: photoUrl,
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                        }
+                        showSpinner(); // Show spinner before uploading photos
 
-                        // Update the photo count in the corresponding logbook entry
-                        const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
-                        updatePhotoCount(userId, logbookId, photoCountElement);
+                        try {
+                            for (const file of newFiles) {
+                                const storageRef = storage.ref().child(`users/${userId}/logbooks/${logbookId}/galleries/${galleryId}/${file.name}`);
+                                await storageRef.put(file);
+                                const photoUrl = await storageRef.getDownloadURL();
+                                newPhotos.push(photoUrl);
+                                await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos').add({
+                                    photoUrl: photoUrl,
+                                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+
+                            // Update the photo count in the corresponding logbook entry
+                            const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
+                            updatePhotoCount(userId, logbookId, photoCountElement);
+                        } catch (error) {
+                            console.error("Error uploading photos: ", error);
+                        } finally {
+                            hideSpinner(); // Hide spinner after photos are uploaded
+                        }
                     });
+
+                    // Set currentLogbookId and currentGalleryId
+                    galleryContainer.querySelector('.gallery-folder').onclick = () => {
+                        currentLogbookId = logbookId;
+                        currentGalleryId = doc.id;
+                        toggleGallery(galleryContainer);
+                    };
 
                     subscribeToPhotos(auth.currentUser.uid, logbookId, doc.id);
                 }
             }).catch(error => {
                 console.error("Error getting logbook document: ", error);
+            });
+        }
+
+        function toggleGallery(galleryContainer) {
+            galleryContainer.classList.toggle('open');
+        }
+
+        // Load public gallery photos
+        function loadPublicGallery() {
+            const publicGalleryGrid = document.getElementById('publicGalleryGrid');
+            publicGalleryGrid.innerHTML = ''; // Clear existing photos
+            publicGalleryPhotos = []; // Clear the previous list of photos
+
+            db.collection('publicGallery').get().then(snapshot => {
+                let index = 0;
+                snapshot.forEach(doc => {
+                    const photo = doc.data();
+                    if (photo && photo.url) {  // Ensure each photo has a URL
+                        photo.id = doc.id; // Store the document ID in the photo object
+                        publicGalleryPhotos.push(photo); // Add photo to the list
+
+                        const img = document.createElement('img');
+                        img.src = photo.url;
+                        img.className = 'gallery-photo';
+                        img.onclick = (function (photo, index) {
+                            return function () {
+                                openPublicImageModal(photo.url, photo, index); // Pass the index
+                            };
+                        })(photo, index);
+                        publicGalleryGrid.appendChild(img);
+
+                        index++; // Increment index manually
+                    } else {
+                        console.error("Photo does not have a URL or is undefined:", doc.id);
+                    }
+                });
+            }).catch(error => {
+                console.error("Error loading public gallery:", error);
+            });
+        }
+
+        function deletePublicImage(docId) {
+            const confirmed = confirm('Are you sure you want to delete this photo? This action cannot be undone.');
+            if (confirmed) {
+                db.collection('publicGallery').doc(docId).delete().then(() => {
+                    alert('Photo deleted successfully!');
+                    document.getElementById('publicImageModal').style.display = 'none';
+                    loadPublicGallery(); // Reload the public gallery to reflect the deletion
+                }).catch(error => {
+                    console.error('Error deleting photo: ', error);
+                    alert('Failed to delete photo. Please try again.');
+                });
+            }
+        }
+
+        function openPublicImageModal(photoUrl, photoData, index) {
+            currentPublicPhotoIndex = index;
+            const imageModal = document.getElementById('publicImageModal');
+            const largeImage = document.getElementById('publicLargeImage');
+            largeImage.src = photoUrl;
+            imageModal.style.display = 'block';
+
+            const imageDetails = document.getElementById('publicImageDetails');
+            imageDetails.innerHTML = ''; // Clear existing details
+
+            // Define the details to display
+            const details = {
+                'Aircraft Type': photoData.details.aircraftType,
+                'Operator': photoData.details.operator,
+                'Aircraft ID': photoData.details.aircraftId,
+                'Flight Number': photoData.details.flightNumber,
+                'Date Spotted': photoData.details.dateSpotted,
+                'Location': photoData.details.location,
+                'Notes': photoData.details.notes
+            };
+
+            // Dynamically add the details to the modal, excluding null fields
+            for (const [label, value] of Object.entries(details)) {
+                if (value) {
+                    const detailRow = document.createElement('p');
+                    detailRow.innerHTML = `<strong>${label}:</strong> ${value}`;
+                    imageDetails.appendChild(detailRow);
+                }
+            }
+
+            // Handle the route separately and place it before the username
+            const originValue = photoData.details.origin;
+            const destinationValue = photoData.details.destination;
+            if (originValue || destinationValue) {
+                const routeRow = document.createElement('p');
+                routeRow.innerHTML = `<strong>Route:</strong> ${originValue || ''} &rarr; ${destinationValue || ''}`;
+                imageDetails.appendChild(routeRow);
+            }
+
+            // Display the username
+            if (photoData.username) {
+                const usernameRow = document.createElement('p');
+                usernameRow.innerHTML = `<strong>Username:</strong> ${photoData.username}`;
+                imageDetails.appendChild(usernameRow);
+            }
+
+            // Show the delete button if the current user is the owner of the photo
+            const deleteButton = document.getElementById('deletePublicImage');
+            const userId = auth.currentUser.uid;
+            if (photoData.userId === userId) {
+                deleteButton.style.display = 'inline';
+                deleteButton.onclick = function () {
+                    deletePublicImage(photoData.id); // Pass the document ID to the delete function
+                };
+            } else {
+                deleteButton.style.display = 'none';
+            }
+
+            updatePublicNavigationButtons();
+        }
+
+        function showNextPublicPhoto() {
+            if (publicGalleryPhotos.length === 0) return;
+            currentPublicPhotoIndex = (currentPublicPhotoIndex + 1) % publicGalleryPhotos.length;
+            const photo = publicGalleryPhotos[currentPublicPhotoIndex];
+            if (photo && photo.url) {
+                openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
+            } else {
+                console.error("Photo or photo URL is not defined for index:", currentPublicPhotoIndex);
+            }
+        }
+
+        function showPreviousPublicPhoto() {
+            if (publicGalleryPhotos.length === 0) return;
+            currentPublicPhotoIndex = (currentPublicPhotoIndex - 1 + publicGalleryPhotos.length) % publicGalleryPhotos.length;
+            const photo = publicGalleryPhotos[currentPublicPhotoIndex];
+            if (photo && photo.url) {
+                openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
+            } else {
+                console.error("Photo or photo URL is not defined for index:", currentPublicPhotoIndex);
+            }
+        }
+
+        function updatePublicNavigationButtons() {
+            const prevButton = document.getElementById('prevPublicPhoto');
+            const nextButton = document.getElementById('nextPublicPhoto');
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
+        }
+
+        // Add event listener for the Publish button
+        document.getElementById('publishPhoto').onclick = function () {
+            const confirmed = confirm('Would you like to publish this photo and its related entry information as well as your username?');
+            if (confirmed) {
+                publishPhoto();
+            }
+        };
+
+        function publishPhoto() {
+            if (currentGalleryPhotos.length === 0) {
+                console.error('No photos available');
+                alert('No photos available to publish.');
+                return;
+            }
+
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            const photoUrl = photoData.photoUrl;
+            const userId = auth.currentUser.uid;
+
+            // Ensure currentLogbookId is defined
+            if (!currentLogbookId) {
+                console.error('currentLogbookId is not defined');
+                alert('Failed to publish photo. Logbook ID is missing.');
+                return;
+            }
+
+            const userRef = db.collection('users').doc(userId);
+            const logbookRef = db.collection('users').doc(userId).collection('logbooks').doc(currentLogbookId);
+
+            // Get user and logbook details
+            Promise.all([userRef.get(), logbookRef.get()])
+                .then(([userDoc, logbookDoc]) => {
+                    const userData = userDoc.data();
+                    const logbookData = logbookDoc.data();
+
+                    // Save photo details to the public collection with references
+                    db.collection('publicGallery').add({
+                        url: photoUrl,
+                        details: logbookData,
+                        username: userData.username,
+                        userId: userId,
+                        userRef: userRef, // Reference to the user document
+                        logbookRef: logbookRef // Reference to the logbook document
+                    }).then(() => {
+                        alert('Photo published successfully!');
+                    }).catch(error => {
+                        console.error('Error publishing photo: ', error);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching user or logbook data: ', error);
+                });
+        }
+
+        // Validate username in sign-up and account update forms
+        function validateUsername(username) {
+            return db.collection('users').where('username', '==', username).get().then(snapshot => {
+                return snapshot.empty; // If empty, username is not taken
             });
         }
 
@@ -1356,17 +1906,21 @@
                     case 'destination':
                         textToSearch = entry.getAttribute('data-destination');
                         break;
+                    case 'notes':
+                        textToSearch = entry.getAttribute('data-notes');
+                        break;
                     default:
                         textToSearch = `
-                    ${entry.getAttribute('data-aircraft-type')} 
-                    ${entry.getAttribute('data-operator')} 
-                    ${entry.getAttribute('data-aircraft-id')} 
-                    ${entry.getAttribute('data-flight-number')} 
-                    ${entry.getAttribute('data-date-spotted')} 
-                    ${entry.getAttribute('data-location')} 
-                    ${entry.getAttribute('data-origin')} 
-                    ${entry.getAttribute('data-destination')} 
-                `;
+                ${entry.getAttribute('data-aircraft-type')} 
+                ${entry.getAttribute('data-operator')} 
+                ${entry.getAttribute('data-aircraft-id')} 
+                ${entry.getAttribute('data-flight-number')} 
+                ${entry.getAttribute('data-date-spotted')} 
+                ${entry.getAttribute('data-location')} 
+                ${entry.getAttribute('data-origin')} 
+                ${entry.getAttribute('data-destination')} 
+                ${entry.getAttribute('data-notes')}
+            `;
                 }
 
                 if (textToSearch.includes(searchValue)) {
@@ -1377,30 +1931,72 @@
             });
         }
 
-        // Function to subscribe to logbooks and add entries
+        const unsubscribeListeners = [];
+
         function subscribeToLogbooks(userId) {
-            db.collection('users').doc(userId).collection('logbooks')
+            const unsubscribe = db.collection('users').doc(userId).collection('logbooks')
                 .orderBy('createdAt', 'asc')
                 .onSnapshot(querySnapshot => {
                     const logbookEntries = document.getElementById('logbookEntries');
                     logbookEntries.innerHTML = '';
                     querySnapshot.forEach(doc => {
                         addLogbookEntry(doc, userId);
+                        // Update associated publicGallery documents
+                        updatePublicGallery(doc.id, doc.data(), userId);
                     });
                 });
+            unsubscribeListeners.push(unsubscribe);
         }
 
-
         function subscribeToGalleries(userId, logbookId) {
-            db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries')
+            const unsubscribe = db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries')
                 .orderBy('createdAt', 'desc')
                 .onSnapshot(gallerySnapshot => {
                     const galleriesContainer = document.getElementById('galleries');
                     galleriesContainer.innerHTML = ''; // Clear existing galleries to prevent duplicates
                     gallerySnapshot.forEach(galleryDoc => {
                         addGallery(galleryDoc, logbookId);
-                        subscribeToPhotos(userId, logbookId, galleryDoc.id); // Subscribe to photos within this gallery
                     });
+                });
+            unsubscribeListeners.push(unsubscribe);
+        }
+
+        function subscribeToPhotos(userId, logbookId, galleryId) {
+            const photosCollectionRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos');
+            const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            const unsubscribe = photosCollectionRef.onSnapshot(async snapshot => {
+                const galleryPhotosContainer = document.querySelector(`.gallery-container[data-logbook-id="${logbookId}"][data-gallery-id="${galleryId}"] .gallery-photos`);
+                galleryPhotosContainer.innerHTML = ''; // Clear existing photos
+                currentGalleryPhotos = []; // Clear currentGalleryPhotos
+
+                const logbookDoc = await logbookDocRef.get();
+                const logbookData = logbookDoc.data();
+
+                snapshot.forEach(doc => {
+                    const photoData = { id: doc.id, ...doc.data(), ...logbookData };
+                    currentGalleryPhotos.push(photoData); // Add to currentGalleryPhotos
+                    addPhotoToGallery(photoData, logbookId, galleryId);
+                });
+            });
+
+            unsubscribeListeners.push(unsubscribe);
+        }
+
+        function updatePublicGallery(logbookId, logbookData, userId) {
+            const logbookRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            db.collection('publicGallery').where('logbookRef', '==', logbookRef).get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        doc.ref.update({
+                            details: logbookData
+                        }).catch(error => {
+                            console.error('Error updating public gallery photo details: ', error);
+                        });
+                    });
+                }).catch(error => {
+                    console.error('Error fetching public gallery photos: ', error);
                 });
         }
 
@@ -1547,6 +2143,7 @@
         }
 
         // Function to filter gallery entries based on search input and filter dropdown
+        // Function to filter gallery entries based on search input and filter dropdown
         function filterGalleries() {
             const searchValue = document.getElementById('gallerySearchBar').value.toLowerCase();
             const filterValue = document.getElementById('galleryFilterDropdown').value;
@@ -1580,17 +2177,21 @@
                     case 'destination':
                         textToSearch = entry.getAttribute('data-destination');
                         break;
+                    case 'notes':
+                        textToSearch = entry.getAttribute('data-notes');
+                        break;
                     default:
                         textToSearch = `
-                    ${entry.getAttribute('data-aircraft-type')} 
-                    ${entry.getAttribute('data-operator')} 
-                    ${entry.getAttribute('data-aircraft-id')} 
-                    ${entry.getAttribute('data-flight-number')} 
-                    ${entry.getAttribute('data-date-spotted')} 
-                    ${entry.getAttribute('data-location')} 
-                    ${entry.getAttribute('data-origin')} 
-                    ${entry.getAttribute('data-destination')}
-                `;
+                ${entry.getAttribute('data-aircraft-type')} 
+                ${entry.getAttribute('data-operator')} 
+                ${entry.getAttribute('data-aircraft-id')} 
+                ${entry.getAttribute('data-flight-number')} 
+                ${entry.getAttribute('data-date-spotted')} 
+                ${entry.getAttribute('data-location')} 
+                ${entry.getAttribute('data-origin')} 
+                ${entry.getAttribute('data-destination')}
+                ${entry.getAttribute('data-notes')}
+            `;
                 }
 
                 if (textToSearch.includes(searchValue)) {
@@ -1602,127 +2203,168 @@
         }
 
         async function exportSingleGallery(logbookId, galleryId) {
-            const userId = auth.currentUser.uid;
-            const zip = new JSZip();
+            showSpinner();
+            try{
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
 
-            const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
-            const logbookDoc = await logbookDocRef.get();
-            if (logbookDoc.exists) {
-                const logbook = logbookDoc.data();
-                const headerText = logbook.entryName;
+                const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+                const logbookDoc = await logbookDocRef.get();
+                if (logbookDoc.exists) {
+                    const logbook = logbookDoc.data();
+                    const headerText = logbook.entryName;
 
-                const galleryDocRef = logbookDocRef.collection('galleries').doc(galleryId);
-                const galleryDoc = await galleryDocRef.get();
-                if (galleryDoc.exists) {
-                    const gallery = galleryDoc.data();
-                    const galleryHeader = gallery.title;
-                    const folder = zip.folder(`${headerText}/${galleryHeader}`);
+                    const galleryDocRef = logbookDocRef.collection('galleries').doc(galleryId);
+                    const galleryDoc = await galleryDocRef.get();
+                    if (galleryDoc.exists) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
 
-                    const photoSnapshot = await galleryDocRef.collection('photos').get();
-                    for (const photoDoc of photoSnapshot.docs) {
-                        const photo = photoDoc.data();
-                        const photoUrl = photo.photoUrl;
-                        const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
-                        const response = await fetch(photoUrl);
-                        const blob = await response.blob();
-                        folder.file(photoName, blob); // Use original file name
+                        const photoSnapshot = await galleryDocRef.collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+
+                        zip.generateAsync({ type: 'blob' }).then(function (content) {
+                            saveAs(content, `gallery.zip`);
+                        });
                     }
-
-                    zip.generateAsync({ type: 'blob' }).then(function (content) {
-                        saveAs(content, `gallery.zip`);
-                    });
                 }
+            }finally{
+                hideSpinner();
             }
         }
 
-        function subscribeToPhotos(userId, logbookId, galleryId) {
+        function addPhotoToGallery(photoData, logbookId, galleryId) {
+            const galleryPhotosContainer = document.querySelector(`.gallery-container[data-logbook-id="${logbookId}"][data-gallery-id="${galleryId}"] .gallery-photos`);
+            if (!galleryPhotosContainer) {
+                console.error('Gallery photos container not found'); // Debug log
+                return;
+            }
+
+            // Check if the photo already exists
+            if (galleryPhotosContainer.querySelector(`[data-photo-id="${photoData.id}"]`)) {
+                return; // Photo already added
+            }
+
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'gallery-photo-container';
+            photoContainer.setAttribute('data-photo-id', photoData.id);
+
+            const img = document.createElement('img');
+            img.src = photoData.photoUrl;
+            img.className = 'gallery-photo';
+            img.onclick = () => {
+                currentGalleryPhotos = Array.from(galleryPhotosContainer.children).map(child => child.querySelector('img').photoData);
+                currentPhotoIndex = currentGalleryPhotos.findIndex(photo => photo.photoUrl === photoData.photoUrl);
+                openImageModal(photoData.photoUrl, photoData);
+            };
+            img.photoData = photoData;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-photo';
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = (event) => {
+                event.stopPropagation();
+                if (confirm('Are you sure you want to delete this photo?')) {
+                    deletePhoto(logbookId, galleryId, photoData);
+                }
+            };
+
+            photoContainer.appendChild(img);
+            photoContainer.appendChild(deleteButton);
+            galleryPhotosContainer.appendChild(photoContainer);
+        }
+
+
+        function deletePhoto(logbookId, galleryId, photoData) {
+            const userId = auth.currentUser.uid;
             db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos')
-                .onSnapshot(photoSnapshot => {
-                    const galleryContainer = document.querySelector(`.gallery-container[data-gallery-id="${galleryId}"]`);
-                    if (!galleryContainer) {
-                        console.error(`Gallery container with ID ${galleryId} not found`);
-                        return;
-                    }
-
-                    const galleryPhotosDiv = galleryContainer.querySelector('.gallery-photos');
-                    if (!galleryPhotosDiv) {
-                        console.error(`Gallery photos div for gallery ID ${galleryId} not found`);
-                        return;
-                    }
-
-                    galleryPhotosDiv.innerHTML = ''; // Clear existing photos to prevent duplicates
-                    const photoUrls = [];
-                    photoSnapshot.forEach(photoDoc => {
-                        const photo = photoDoc.data();
-                        photoUrls.push(photo.photoUrl);
-
-                        const imgContainer = document.createElement('div');
-                        imgContainer.className = 'gallery-photo-container';
-                        const img = document.createElement('img');
-                        img.src = photo.photoUrl;
-                        img.className = 'gallery-photo';
-                        img.alt = 'Gallery Photo';
-                        img.onclick = function () {
-                            openImageModal(photo.photoUrl, photoUrls); // Pass the photo URLs to the modal
-                        };
-
-                        const deleteButton = document.createElement('button');
-                        deleteButton.className = 'delete-photo';
-                        deleteButton.textContent = 'Delete';
-                        deleteButton.onclick = async function () {
-                            await deletePhoto(userId, logbookId, galleryId, photoDoc.id, photo.photoUrl);
-                        };
-
-                        imgContainer.appendChild(img);
-                        imgContainer.appendChild(deleteButton);
-                        galleryPhotosDiv.appendChild(imgContainer);
+                .where('photoUrl', '==', photoData.photoUrl).get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        doc.ref.delete().then(() => {
+                            console.log('Photo successfully deleted!');
+                            // Update the photo count in the corresponding logbook entry
+                            const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
+                            updatePhotoCount(userId, logbookId, photoCountElement);
+                        }).catch(error => {
+                            console.error('Error removing photo: ', error);
+                        });
                     });
+                }).catch(error => {
+                    console.error('Error getting photo for deletion: ', error);
                 });
-        }
-
-        async function deletePhoto(userId, logbookId, galleryId, photoId, photoUrl) {
-            // Delete photo document in Firestore
-            await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos').doc(photoId).delete();
-
-            // Delete photo file in Storage
-            const storageRef = storage.refFromURL(photoUrl);
-            await storageRef.delete();
-
-            const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
-            updatePhotoCount(userId, logbookId, photoCountElement);
-        }
-
-
-        function toggleGallery(folder) {
-            const galleryContainer = folder.closest('.gallery-container');
-            galleryContainer.classList.toggle('open');
         }
 
         let currentPhotoIndex = 0;
         let currentPhotoUrls = [];
 
-        function openImageModal(photoUrl, galleryPhotos) {
+        let currentPublicPhotoIndex = 0;
+        let publicGalleryPhotos = [];
+
+        let currentLogbookId = null; // Define currentLogbookId
+
+
+        function openImageModal(photoUrl, photoData) {
             const imageModal = document.getElementById('imageModal');
             const largeImage = document.getElementById('largeImage');
             largeImage.src = photoUrl;
             imageModal.style.display = 'block';
 
-            currentPhotoUrls = galleryPhotos;
-            currentPhotoIndex = currentPhotoUrls.indexOf(photoUrl);
+            const imageDetails = document.getElementById('imageDetails');
+            imageDetails.innerHTML = ''; // Clear existing details
+
+            // Define the details to display
+            const details = {
+                'Aircraft Type': photoData.aircraftType,
+                'Operator': photoData.operator,
+                'Aircraft ID': photoData.aircraftId,
+                'Flight Number': photoData.flightNumber,
+                'Date Spotted': photoData.dateSpotted,
+                'Location': photoData.location,
+                'Notes': photoData.notes
+            };
+
+            // Dynamically add the details to the modal, excluding null fields
+            for (const [label, value] of Object.entries(details)) {
+                if (value) {
+                    const detailRow = document.createElement('p');
+                    detailRow.innerHTML = `<strong>${label}:</strong> ${value}`;
+                    imageDetails.appendChild(detailRow);
+                }
+            }
+
+            // Handle the route separately
+            const originValue = photoData.origin;
+            const destinationValue = photoData.destination;
+            if (originValue || destinationValue) {
+                const routeRow = document.createElement('p');
+                routeRow.innerHTML = `<strong>Route:</strong> ${originValue || ''} &rarr; ${destinationValue || ''}`;
+                imageDetails.appendChild(routeRow);
+            }
 
             updateNavigationButtons();
         }
 
         function showNextPhoto() {
-            currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotoUrls.length;
-            document.getElementById('largeImage').src = currentPhotoUrls[currentPhotoIndex];
-            updateNavigationButtons();
+            if (currentGalleryPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex + 1) % currentGalleryPhotos.length;
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            openImageModal(photoData.photoUrl, photoData);
         }
 
         function showPreviousPhoto() {
-            currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotoUrls.length) % currentPhotoUrls.length;
-            document.getElementById('largeImage').src = currentPhotoUrls[currentPhotoIndex];
-            updateNavigationButtons();
+            if (currentGalleryPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex - 1 + currentGalleryPhotos.length) % currentGalleryPhotos.length;
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            openImageModal(photoData.photoUrl, photoData);
         }
 
         function updateNavigationButtons() {
@@ -1730,6 +2372,9 @@
             const nextButton = document.getElementById('nextPhoto');
             prevButton.style.display = 'block';
             nextButton.style.display = 'block';
+
+            prevButton.onclick = showPreviousPhoto;
+            nextButton.onclick = showNextPhoto;
         }
 
         document.addEventListener('keydown', function (event) {
@@ -1740,7 +2385,18 @@
                     showPreviousPhoto();
                 }
             }
+            if (document.getElementById('publicImageModal').style.display === 'block') {
+                if (event.key === 'ArrowRight') {
+                    showNextPublicPhoto();
+                } else if (event.key === 'ArrowLeft') {
+                    showPreviousPublicPhoto();
+                }
+            }
         });
+
+        document.getElementById('nextPublicPhoto').onclick = showNextPublicPhoto;
+        document.getElementById('prevPublicPhoto').onclick = showPreviousPublicPhoto;
+
 
         document.getElementById('nextPhoto').onclick = showNextPhoto;
         document.getElementById('prevPhoto').onclick = showPreviousPhoto;
@@ -1840,6 +2496,29 @@
             const imageModal = document.getElementById("imageModal");
             const imageModalClose = document.querySelector("#imageModal .close");
 
+            firebase.auth().onAuthStateChanged(function (user) {
+                loadingSpinner.style.display = 'none'; // Hide the spinner once authentication state is known
+                document.querySelectorAll('.hidden').forEach(element => element.classList.remove('hidden')); // Remove hidden class once we know the auth state
+
+                // Reset flags on authentication state change
+                isLogbookLoaded = false;
+                isGalleryLoaded = false;
+                isPublicGalleryLoaded = false;
+                isAccountLoaded = false;
+
+                if (user) {
+                    // User is signed in
+                    showHamburgerMenu();
+                    document.querySelector('.login-page').style.display = 'none';
+                    loadActiveContainer(); // Call the function to load the last active container
+                } else {
+                    // No user is signed in
+                    hideAllSections();
+                    document.querySelector('.login-page').style.display = 'flex';
+                    document.getElementById("hamburger-menu").style.display = "none";
+                }
+            });
+
             if (spotDetailsClose) {
                 spotDetailsClose.onclick = function () {
                     spotDetailsModal.style.display = "none";
@@ -1859,6 +2538,19 @@
                 }
             }
 
+            // Close modals when clicking the close button or outside the modal
+            document.querySelectorAll('.modal .close').forEach(closeBtn => {
+                closeBtn.onclick = function () {
+                    closeBtn.parentElement.parentElement.style.display = 'none';
+                };
+            });
+
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+
             window.onclick = function (event) {
                 if (event.target == addSpotModal) {
                     addSpotModal.style.display = "none";
@@ -1869,6 +2561,9 @@
                 }
                 if (event.target == imageModal) {
                     imageModal.style.display = "none";
+                }
+                if (event.target == publicImageModal) {
+                    publicImageModal.style.display = "none";
                 }
             }
 
@@ -1916,6 +2611,7 @@
             document.getElementById('signupLink').onclick = function () {
                 loginPage.style.display = 'none';
                 signupPage.style.display = 'flex';
+                signupForm.style.display = 'block';
             }
 
             document.getElementById('loginLink').onclick = function () {
@@ -1933,6 +2629,7 @@
                         const userData = doc.data();
                         document.getElementById('firstName').value = userData.firstName;
                         document.getElementById('lastName').value = userData.lastName;
+                        document.getElementById('username').value = userData.username || 'Please Create a Username!';
                         document.getElementById('email').value = user.email || '';
                     }
                 });
@@ -1941,37 +2638,39 @@
 
         document.getElementById('accountForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            const user = auth.currentUser;
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
+            const newUsername = document.getElementById('username').value;
 
-            if (user) {
-                const promises = [];
-                if (email !== user.email) {
-                    promises.push(user.updateEmail(email));
+            validateUsername(newUsername).then(isValid => {
+                if (isValid) {
+                    event.preventDefault();
+                    const user = auth.currentUser;
+                    const firstName = document.getElementById('firstName').value;
+                    const lastName = document.getElementById('lastName').value;
+                    const email = document.getElementById('email').value;
+
+                    if (user) {
+                        const promises = [];
+                        if (email !== user.email) {
+                            promises.push(user.updateEmail(email));
+                        }
+
+                        Promise.all(promises).then(() => {
+                            return db.collection('users').doc(user.uid).update({
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email
+                            });
+                        }).then(() => {
+                        }).catch(error => {
+                            console.error("Error updating account details:", error);
+                            alert("There was an error updating your account, please try again.")
+                        });
+                    }
+                } else {
+                    alert('Username is already taken.');
                 }
-
-                Promise.all(promises).then(() => {
-                    return db.collection('users').doc(user.uid).update({
-                        firstName: firstName,
-                        lastName: lastName,
-                        email: email
-                    });
-                }).then(() => {
-                }).catch(error => {
-                    console.error("Error updating account details:", error);
-                    alert("There was an error updating your account, please try again.")
-                });
-            }
+            });
         });
-
-        accountNav.onclick = function () {
-            logbookSection.style.display = 'none';
-            gallerySection.style.display = 'none';
-            accountSection.style.display = 'block';
-            loadAccountDetails();
-        }
 
         function showSpinner() {
             document.getElementById('loadingSpinner').style.display = 'block';
@@ -1982,6 +2681,7 @@
         }
 
     </script>
+
 </body>
 
 </html>
