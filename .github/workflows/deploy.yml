@@ -45,8 +45,23 @@ jobs:
           };
           firebase.initializeApp(firebaseConfig);
           EOF
+          # Debugging: List contents of public directory
+          echo "Contents of public directory after creating config.js:"
+          ls -la public
+          
+          # Copy index.html to public directory
           cp index.html public/index.html
-          if [ -d "./assets" ]; then cp -r ./assets public/assets; fi
+          
+          # Debugging: List contents of public directory again
+          echo "Contents of public directory after copying index.html:"
+          ls -la public
+          
+          # Copy assets if they exist
+          if [ -d "./assets" ]; then 
+            cp -r ./assets public/assets
+            echo "Contents of public directory after copying assets:"
+            ls -la public/assets
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
