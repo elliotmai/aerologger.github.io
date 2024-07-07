@@ -23,8 +23,9 @@ jobs:
 
       - name: Build the project
         run: |
+          rm -rf public  # Remove the existing public directory to avoid conflicts
           mkdir -p public
-          cp index.html public/index.html  # Adjust path if necessary
+          cp index.html public/index.html
           if [ -d "./assets" ]; then cp -r ./assets public/assets; fi # Copy assets if they exist
 
       - name: Deploy to GitHub Pages
