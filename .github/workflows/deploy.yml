@@ -47,7 +47,13 @@ jobs:
           EOF
           # Copy index.html to public directory
           cp index.html public/index.html
-          cp AeroLogger_Logo.png public/AeroLogger_Logo.png
+
+          # Ensure assets directory exists and copy assets
+          mkdir -p public/assets
+          cp -r assets/* public/assets/
+
+          # Copy favicon to the root of the public directory
+          cp assets/AeroLogger_Logo.png public/AeroLogger_Logo.png
 
           # Create CNAME file for custom domain
           echo "aero-logger.com" > public/CNAME
@@ -55,6 +61,8 @@ jobs:
           # Debugging: List contents of public directory
           echo "Contents of public directory after build:"
           ls public
+          echo "Contents of public/assets directory:"
+          ls public/assets
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
