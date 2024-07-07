@@ -54,9 +54,7 @@ jobs:
           
           # Debugging: List contents of public directory
           echo "Contents of public directory after build:"
-          ls -la public
-          echo "Contents of public/assets directory:"
-          ls -la public/assets
+          ls public
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
