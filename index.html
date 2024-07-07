@@ -795,37 +795,6 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        document.querySelectorAll('#sidebar a').forEach(link => {
-            link.addEventListener('click', closeSidebar);
-        });
-
-        // Show the hamburger menu after login
-        function showHamburgerMenu() {
-            document.getElementById("hamburger-menu").style.display = "block";
-        }
-
-        function unsubscribeAllListeners() {
-            unsubscribeListeners.forEach(unsubscribe => unsubscribe());
-            unsubscribeListeners.length = 0; // Clear the array
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', function () {
-            unsubscribeAllListeners(); // Unsubscribe from all listeners
-            firebase.auth().signOut().then(() => {
-                // Sign-out successful
-                localStorage.removeItem('activeContainer'); // Clear the active container
-                document.querySelector('.login-page').style.display = 'flex';
-                document.querySelector('.logbook').style.display = 'none';
-                document.querySelector('.gallery').style.display = 'none';
-                document.querySelector('.public-gallery').style.display = 'none';
-                document.querySelector('.account').style.display = 'none';
-                document.getElementById("hamburger-menu").style.display = "none";
-            }).catch((error) => {
-                // An error happened during logout
-                console.error('Logout Error:', error);
-            });
-        });
-
         const logbookNav = document.getElementById('logbookNav');
         const galleryNav = document.getElementById('galleryNav');
         const publicGalleryNav = document.getElementById('publicGalleryNav');
@@ -2623,46 +2592,77 @@
             });
 
             function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                closeSidebar();
-            } else {
-                openSidebar();
+                const sidebar = document.getElementById("sidebar");
+                if (sidebar.style.width === "250px") {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
             }
-        }
 
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+            const hamburgerMenu = document.getElementById('hamburger-menu');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
 
-        let sidebarTimeout;
+            let sidebarTimeout;
 
-        function openSidebar() {
-            sidebar.style.width = '250px';
-            document.body.classList.add('sidebar-open');
-            clearTimeout(sidebarTimeout);
-            overlay.style.display = 'block';
-        }
-
-        function closeSidebar() {
-            sidebarTimeout = setTimeout(() => {
-                sidebar.style.width = '0';
-                document.body.classList.remove('sidebar-open');
-                overlay.style.display = 'none';
-            }, 500); // Delay to allow user to move the mouse
-        }
-
-        hamburgerMenu.addEventListener('mouseover', openSidebar);
-        sidebar.addEventListener('mouseover', openSidebar);
-
-        hamburgerMenu.addEventListener('mouseout', closeSidebar);
-        sidebar.addEventListener('mouseout', closeSidebar);
-
-        document.addEventListener('click', function (event) {
-            if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
-                closeSidebar();
+            function openSidebar() {
+                sidebar.style.width = '250px';
+                document.body.classList.add('sidebar-open');
+                clearTimeout(sidebarTimeout);
+                overlay.style.display = 'block';
             }
-        });
+
+            function closeSidebar() {
+                sidebarTimeout = setTimeout(() => {
+                    sidebar.style.width = '0';
+                    document.body.classList.remove('sidebar-open');
+                    overlay.style.display = 'none';
+                }, 500); // Delay to allow user to move the mouse
+            }
+
+            hamburgerMenu.addEventListener('mouseover', openSidebar);
+            sidebar.addEventListener('mouseover', openSidebar);
+
+            hamburgerMenu.addEventListener('mouseout', closeSidebar);
+            sidebar.addEventListener('mouseout', closeSidebar);
+
+            document.addEventListener('click', function (event) {
+                if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                    closeSidebar();
+                }
+            });
+
+            document.querySelectorAll('#sidebar a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            // Show the hamburger menu after login
+            function showHamburgerMenu() {
+                document.getElementById("hamburger-menu").style.display = "block";
+            }
+
+            function unsubscribeAllListeners() {
+                unsubscribeListeners.forEach(unsubscribe => unsubscribe());
+                unsubscribeListeners.length = 0; // Clear the array
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                unsubscribeAllListeners(); // Unsubscribe from all listeners
+                firebase.auth().signOut().then(() => {
+                    // Sign-out successful
+                    localStorage.removeItem('activeContainer'); // Clear the active container
+                    document.querySelector('.login-page').style.display = 'flex';
+                    document.querySelector('.logbook').style.display = 'none';
+                    document.querySelector('.gallery').style.display = 'none';
+                    document.querySelector('.public-gallery').style.display = 'none';
+                    document.querySelector('.account').style.display = 'none';
+                    document.getElementById("hamburger-menu").style.display = "none";
+                }).catch((error) => {
+                    // An error happened during logout
+                    console.error('Logout Error:', error);
+                });
+            });
 
 
             if (spotDetailsClose) {
