@@ -47,13 +47,19 @@ jobs:
           EOF
           # Copy index.html to public directory
           cp index.html public/index.html
+
+          # Ensure assets directory exists and copy assets
+          mkdir -p public/assets
+          cp -r assets/* public/assets/
+
+          # Create CNAME file for custom domain
+          echo "aero-logger.com" > public/CNAME
           
-          # Copy assets if they exist
-          if [ -d "./assets" ]; then 
-            cp -r ./assets public/assets
-            echo "Contents of public directory after copying assets:"
-            ls -la public/assets
-          fi
+          # Debugging: List contents of public directory
+          echo "Contents of public directory after build:"
+          ls -la public
+          echo "Contents of public/assets directory:"
+          ls -la public/assets
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
