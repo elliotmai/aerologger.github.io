@@ -47,9 +47,6 @@ jobs:
           EOF
           # Copy index.html to public directory
           cp index.html public/index.html
-
-          # Copy AeroLogger_Logo.png to public assets directory
-          cp AeroLogger_Logo.png public/assets/AeroLogger_Logo.png
           
           # Copy assets if they exist
           if [ -d "./assets" ]; then 
