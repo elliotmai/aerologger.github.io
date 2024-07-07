@@ -367,7 +367,10 @@
             background-color: #e6e6e6;
         }
 
-        .logbook-header {
+        .logbook-header,
+        .gallery-header,
+        .logbook-order-header,
+        .gallery-order-header {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -390,16 +393,6 @@
             border-radius: 5px;
         }
 
-        .gallery-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            /* Adjust spacing between elements if needed */
-            margin-bottom: 20px;
-            /* Adjust space between header and gallery entries if needed */
-        }
-
         #gallerySearchBar {
             width: 20%;
             padding: 10px;
@@ -411,6 +404,16 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+
+        .order-dropdown {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+            /* Adjust spacing as needed */
+            display: inline-block;
+            /* Ensures the dropdowns stay inline */
         }
 
         .add-spot-btn {
@@ -572,7 +575,22 @@
                     <option value="location">By Location</option>
                     <option value="origin">By Origin</option>
                     <option value="destination">By Destination</option>
-                    <option value="notes">By Notes</option>
+                </select>
+            </div>
+            <div class="logbook-order-header">
+                <select id="logbookOrderField" class="order-dropdown" onchange="updateLogbookOrderDirection()">
+                    <option value="createdAt" data-type="date">Order By Created At</option>
+                    <option value="aircraftType" data-type="text">Order By Aircraft Type</option>
+                    <option value="operator" data-type="text">Order By Operator</option>
+                    <option value="aircraftId" data-type="text">Order By Aircraft ID</option>
+                    <option value="flightNumber" data-type="text">Order By Flight Number</option>
+                    <option value="dateSpotted" data-type="date">Order By Date Spotted</option>
+                    <option value="location" data-type="text">Order By Location</option>
+                    <option value="origin" data-type="text">Order By Origin</option>
+                    <option value="destination" data-type="text">Order By Destination</option>
+                </select>
+                <select id="logbookOrderDirection" class="order-dropdown" onchange="orderLogbook()">
+                    <!-- Options will be populated dynamically -->
                 </select>
             </div>
             <button class="add-spot-btn" id="addSpotBtn">Add Spot</button>
@@ -594,7 +612,22 @@
                     <option value="location">By Location</option>
                     <option value="origin">By Origin</option>
                     <option value="destination">By Destination</option>
-                    <option value="notes">By Notes</option>
+                </select>
+            </div>
+            <div class="gallery-order-header">
+                <select id="galleryOrderField" class="order-dropdown" onchange="updateGalleryOrderDirection()">
+                    <option value="createdAt" data-type="date">Order By Created At</option>
+                    <option value="aircraftType" data-type="text">Order By Aircraft Type</option>
+                    <option value="operator" data-type="text">Order By Operator</option>
+                    <option value="aircraftId" data-type="text">Order By Aircraft ID</option>
+                    <option value="flightNumber" data-type="text">Order By Flight Number</option>
+                    <option value="dateSpotted" data-type="date">Order By Date Spotted</option>
+                    <option value="location" data-type="text">Order By Location</option>
+                    <option value="origin" data-type="text">Order By Origin</option>
+                    <option value="destination" data-type="text">Order By Destination</option>
+                </select>
+                <select id="galleryOrderDirection" class="order-dropdown" onchange="orderGallery()">
+                    <!-- Options will be populated dynamically -->
                 </select>
             </div>
             <h2>Gallery</h2>
@@ -1931,6 +1964,53 @@
             });
         }
 
+        function updateLogbookOrderDirection() {
+            const orderField = document.getElementById('logbookOrderField');
+            const orderDirection = document.getElementById('logbookOrderDirection');
+            const selectedField = orderField.options[orderField.selectedIndex];
+            const fieldType = selectedField.getAttribute('data-type');
+
+            orderDirection.innerHTML = ''; // Clear existing options
+
+            if (fieldType === 'text') {
+                orderDirection.innerHTML = `
+            <option value="desc">A-Z</option>
+            <option value="asc">Z-A</option>
+        `;
+            } else if (fieldType === 'date') {
+                orderDirection.innerHTML = `
+            <option value="asc">Newest to Oldest</option>
+            <option value="desc">Oldest to Newest</option>
+        `;
+            }
+
+            orderLogbook(); // Call orderLogbook to apply the new order direction
+        }
+
+        function orderLogbook() {
+            const user = auth.currentUser;
+            if (!user) {
+                console.error('User not authenticated');
+                return;
+            }
+            const orderField = document.getElementById('logbookOrderField').value;
+            const orderDirection = document.getElementById('logbookOrderDirection').value;
+            const userId = user.uid;
+            const logbookEntries = document.getElementById('logbookEntries');
+
+            // Clear existing entries
+            logbookEntries.innerHTML = '';
+
+            // Fetch and order logbook entries
+            db.collection('users').doc(userId).collection('logbooks')
+                .orderBy(orderField, orderDirection)
+                .get().then(snapshot => {
+                    snapshot.forEach(doc => {
+                        addLogbookEntry(doc, userId);
+                    });
+                });
+        }
+
         const unsubscribeListeners = [];
 
         function subscribeToLogbooks(userId) {
@@ -2202,9 +2282,55 @@
             });
         }
 
+        function updateGalleryOrderDirection() {
+            const orderField = document.getElementById('galleryOrderField');
+            const orderDirection = document.getElementById('galleryOrderDirection');
+            const selectedField = orderField.options[orderField.selectedIndex];
+            const fieldType = selectedField.getAttribute('data-type');
+
+            orderDirection.innerHTML = ''; // Clear existing options
+
+            if (fieldType === 'text') {
+                orderDirection.innerHTML = `
+            <option value="desc">A-Z</option>
+            <option value="asc">Z-A</option>
+        `;
+            } else if (fieldType === 'date') {
+                orderDirection.innerHTML = `
+            <option value="asc">Newest to Oldest</option>
+            <option value="desc">Oldest to Newest</option>
+        `;
+            }
+
+            orderGallery(); // Call orderGallery to apply the new order direction
+        }
+        function orderGallery() {
+            const user = auth.currentUser;
+            if (!user) {
+                console.error('User not authenticated');
+                return;
+            }
+            const orderField = document.getElementById('galleryOrderField').value;
+            const orderDirection = document.getElementById('galleryOrderDirection').value;
+            const userId = user.uid;
+            const galleriesContainer = document.getElementById('galleries');
+
+            // Clear existing galleries
+            galleriesContainer.innerHTML = '';
+
+            // Fetch and order gallery entries
+            db.collection('users').doc(userId).collection('logbooks')
+                .orderBy(orderField, orderDirection)
+                .get().then(logbooksSnapshot => {
+                    logbooksSnapshot.forEach(logbookDoc => {
+                        subscribeToGalleries(userId, logbookDoc.id);
+                    });
+                });
+        }
+
         async function exportSingleGallery(logbookId, galleryId) {
             showSpinner();
-            try{
+            try {
                 const userId = auth.currentUser.uid;
                 const zip = new JSZip();
 
@@ -2236,7 +2362,7 @@
                         });
                     }
                 }
-            }finally{
+            } finally {
                 hideSpinner();
             }
         }
@@ -2489,6 +2615,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            orderLogbook();
+            orderGallery();
             const spotDetailsModal = document.getElementById("spotDetailsModal");
             const spotDetailsClose = document.querySelector("#spotDetailsModal .close");
             const addSpotModal = document.getElementById("addSpotModal");
@@ -2511,6 +2639,10 @@
                     showHamburgerMenu();
                     document.querySelector('.login-page').style.display = 'none';
                     loadActiveContainer(); // Call the function to load the last active container
+                    updateLogbookOrderDirection();
+                    updateGalleryOrderDirection();
+                    orderLogbook();
+                    orderGallery();
                 } else {
                     // No user is signed in
                     hideAllSections();
