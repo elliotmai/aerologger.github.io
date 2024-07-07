@@ -45,25 +45,17 @@ jobs:
           };
           firebase.initializeApp(firebaseConfig);
           EOF
-          # Debugging: List contents of public directory
-          echo "Contents of public directory after creating config.js:"
-          ls public
-          
           # Copy index.html to public directory
           cp index.html public/index.html
 
           # Copy AeroLogger_Logo.png to public assets directory
           cp AeroLogger_Logo.png public/assets/AeroLogger_Logo.png
           
-          # Debugging: List contents of public directory again
-          echo "Contents of public directory after copying index.html:"
-          ls public
-          
           # Copy assets if they exist
           if [ -d "./assets" ]; then 
             cp -r ./assets public/assets
             echo "Contents of public directory after copying assets:"
-            ls public/assets
+            ls -la public/assets
           fi
 
       - name: Deploy to GitHub Pages
