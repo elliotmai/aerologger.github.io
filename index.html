@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroLogger</title>
+    <link rel="icon" type="image/png" href="AeroLogger_Logo.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #122835;
+            color: #E7995D;
+            margin: 0;
+            padding: 0;
+            transition: margin-left .5s;
+        }
+
+        header {
+            background-color: #0984A2;
+            color: white;
+            padding: 1em 0;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #hamburger-menu {
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+            position: absolute;
+            left: 5%;
+            display: none;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #122835;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 22px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #0984A2;
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidebar {
+                padding-top: 15px;
+            }
+
+            .sidebar a {
+                font-size: 18px;
+            }
+        }
+
+        #spotDetailsDisplay {
+            color: #589F9F;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #589F9F;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background-color: #0984A2;
+            border-radius: 5px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: #122835;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .logbook,
+        .gallery,
+        .account,
+        .login-page,
+        .signup-page,
+        .signup-form,
+        .public-gallery {
+            display: none;
+        }
+
+        .spot-widget {
+            background-color: white;
+            color: #122835;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .spot-widget h3 {
+            color: #0984A2;
+            margin: 0 0 10px 0;
+        }
+
+        .spot-widget:hover {
+            transform: scale(1.01);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="file"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 97%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"],
+        .login-btn,
+        .signup-btn,
+        #editDetailsBtn {
+            background-color: #0984A2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .gallery-container {
+            margin: 20px 0;
+        }
+
+        .gallery-folder {
+            background-color: #589F9F;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .gallery-folder:hover {
+            transform: scale(1.01);
+        }
+
+        .gallery-photos {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .gallery-photo {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-photo:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-container.open .gallery-photos {
+            display: grid;
+        }
+
+        .gallery-photo-container {
+            position: relative;
+        }
+
+        .delete-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 2px 5px;
+        }
+
+        .gallery-actions {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .gallery-container.open .gallery-actions {
+            display: block;
+        }
+
+        .public-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            /* Adjust the gap between photos as needed */
+            padding: 10px;
+        }
+
+        .public-gallery-grid img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            /* Ensure the image covers the grid item without distortion */
+            border-radius: 5px;
+            /* Optional: Adds slight rounding to the image corners */
+            cursor: pointer;
+            /* Change cursor to pointer on hover */
+            transition: transform 0.2s;
+            /* Optional: Smooth transition for scaling effect */
+        }
+
+        .public-gallery-grid img:hover {
+            transform: scale(1.05);
+            /* Optional: Slight scaling effect on hover */
+        }
+
+        .login-page,
+        .signup-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+
+        .login-form,
+        .signup-form {
+            background-color: #122835;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        #signupLink,
+        #forgotPasswordLink,
+        #loginLink,
+        #resendVerificationLink {
+            color: #589F9F;
+        }
+
+        .account button {
+            margin-top: 10px;
+        }
+
+        .delete-btn,
+        .delete-gallery,
+        #publishPhoto {
+            background-color: #E7995D;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #deletePublicImage {
+            display: none;
+            background-color: #E7995D;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .button-row {
+            margin-top: 10px;
+        }
+
+        .edit-btn,
+        #viewPhotosBtn,
+        #exportSingleLogbookBtn,
+        #cancelEditBtn {
+            background-color: #fefefe;
+            color: #0984A2;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .edit-btn:hover,
+        #viewPhotosBtn:hover,
+        #exportSingleLogbookBtn:hover,
+        #cancelEditBtn:hover {
+            background-color: #e6e6e6;
+        }
+
+        .logbook-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            /* Adjust spacing between elements if needed */
+            margin-bottom: 20px;
+            /* Adjust space between header and logbook entries if needed */
+        }
+
+        #logbookSearchBar {
+            width: 20%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #logbookFilterDropdown {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            /* Adjust spacing between elements if needed */
+            margin-bottom: 20px;
+            /* Adjust space between header and gallery entries if needed */
+        }
+
+        #gallerySearchBar {
+            width: 20%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #galleryFilterDropdown {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .add-spot-btn {
+            background-color: #0984A2;
+            color: white;
+            border: none;
+            margin-top: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .export-gallery {
+            background-color: #0984A2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .spinner {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            bottom: 10px;
+            width: 100%;
+        }
+
+        #prevPhoto,
+        #nextPhoto,
+        #prevPublicPhoto,
+        #nextPublicPhoto {
+            background-color: #0984A2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #prevPhoto:hover,
+        #nextPhoto:hover,
+        #prevPublicPhoto:hover,
+        #nextPublicPhoto:hover {
+            background-color: #07668C;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script src="/config.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>AeroLogger - Log Your Aircraft Spots</h1>
+        <div id="hamburger-menu" onclick="toggleSidebar()">&#9776;</div>
+    </header>
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="toggleSidebar()">&times;</a>
+        <a href="#" id="logbookNav">Logbook</a>
+        <a href="#" id="galleryNav">Gallery</a>
+        <a href="#" id="publicGalleryNav">Public Gallery</a>
+        <a href="#" id="accountNav">Account</a>
+        <a href="#" id="logoutBtn">Logout</a>
+    </div>
+    <div id="overlay"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 0;">
+    </div>
+    <div class="container hidden">
+        <div class="login-page">
+            <div class="login-form">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <label for="email">Email:</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                    <label for="password">Password:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                    <div style="padding-bottom: 5px;">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <label for="rememberMe">Remember Me</label>
+                    </div>
+                    <input type="submit" value="Login" class="login-btn">
+                </form>
+                <p id="loginErrorMessage" style="color: red; display: none;"></p> <!-- Add this line -->
+                <p>Don't have an account? <a href="#" id="signupLink">Sign up here</a></p>
+                <p><a href="#" id="forgotPasswordLink">Forgot Password?</a></p>
+                <p><a href="#" id="resendVerificationLink">Resend Verification Email</a></p>
+
+            </div>
+        </div>
+        <div class="signup-page hidden">
+            <div class="signup-form">
+                <h2>Sign Up</h2>
+                <form id="signupForm">
+                    <label for="signupFirstName">First Name:</label>
+                    <input type="text" id="signupFirstName" name="firstName" required>
+                    <label for="signupLastName">Last Name:</label>
+                    <input type="text" id="signupLastName" name="lastName" required>
+                    <label for="signupUsername">Username:</label>
+                    <input type="text" id="signupUsername" name="username" required>
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" id="signupEmail" name="email" required>
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" name="password" required>
+                    <input type="submit" value="Sign Up" class="signup-btn">
+                </form>
+                <p>Already have an account? <a href="#" id="loginLink">Log in here</a></p>
+            </div>
+        </div>
+        <div class="logbook hidden">
+            <div class="logbook-header">
+                <input type="text" id="logbookSearchBar" placeholder="Search..." oninput="filterLogbook()">
+                <select id="logbookFilterDropdown" onchange="filterLogbook()">
+                    <option value="">All</option>
+                    <option value="aircraftType">By Aircraft Type</option>
+                    <option value="operator">By Operator</option>
+                    <option value="aircraftId">By Aircraft ID</option>
+                    <option value="flightNumber">By Flight Number</option>
+                    <option value="dateSpotted">By Date Spotted</option>
+                    <option value="location">By Location</option>
+                    <option value="origin">By Origin</option>
+                    <option value="destination">By Destination</option>
+                    <option value="notes">By Notes</option>
+                </select>
+            </div>
+            <button class="add-spot-btn" id="addSpotBtn">Add Spot</button>
+            <h2>Your Logbook</h2>
+            <div id="logbookEntries">
+                <!-- Logbook entries will be added here dynamically -->
+            </div>
+        </div>
+        <div class="gallery hidden">
+            <div class="gallery-header">
+                <input type="text" id="gallerySearchBar" placeholder="Search..." oninput="filterGalleries()">
+                <select id="galleryFilterDropdown" onchange="filterGalleries()">
+                    <option value="">All</option>
+                    <option value="aircraftType">By Aircraft Type</option>
+                    <option value="operator">By Operator</option>
+                    <option value="aircraftId">By Aircraft ID</option>
+                    <option value="flightNumber">By Flight Number</option>
+                    <option value="dateSpotted">By Date Spotted</option>
+                    <option value="location">By Location</option>
+                    <option value="origin">By Origin</option>
+                    <option value="destination">By Destination</option>
+                    <option value="notes">By Notes</option>
+                </select>
+            </div>
+            <h2>Gallery</h2>
+            <div id="galleries">
+                <!-- Galleries will be added here dynamically -->
+            </div>
+        </div>
+        <div class="public-gallery hidden">
+            <h2>Public Gallery</h2>
+            <div class="public-gallery-grid" id="publicGalleryGrid">
+                <!-- Public photos will be dynamically added here -->
+            </div>
+        </div>
+        <div class="account hidden">
+            <h2>Account</h2>
+            <div class="profile-pic" id="profilePic"></div>
+            <form id="accountForm">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="email">Email Address:</label>
+                <input type="text" id="email" name="email" required>
+                <input type="submit" value="Update Account">
+            </form>
+            <button class="delete-btn" id="deleteAccountBtn">Delete Account</button>
+            <button class="edit-btn" id="exportLogbookBtn">Export Entries</button>
+            <button class="edit-btn" id="exportGalleriesBtn">Export Galleries</button>
+            <button class="edit-btn" id="exportAllBtn">Export All</button>
+        </div>
+    </div>
+    <div id="spotDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="spotModalHeader"></h2>
+            <div id="spotDetailsDisplay">
+                <p id="displayAircraftTypeRow"><strong>Aircraft Type:</strong> <span id="displayAircraftType"></span>
+                </p>
+                <p id="displayOperatorRow"><strong>Operator:</strong> <span id="displayOperator"></span></p>
+                <p id="displayAircraftIdRow"><strong>Aircraft ID:</strong> <span id="displayAircraftId"></span></p>
+                <p id="displayFlightNumberRow"><strong>Flight Number:</strong> <span id="displayFlightNumber"></span>
+                </p>
+                <p id="displayDateSpottedRow"><strong>Date Spotted:</strong> <span id="displayDateSpotted"></span></p>
+                <p id="displayLocationRow"><strong>Location:</strong> <span id="displayLocation"></span></p>
+                <p id="displayRouteRow"><strong>Route:</strong> <span id="displayOrigin"></span> &rarr; <span
+                        id="displayDestination"></span></p>
+                <p id="displayNotesRow"><strong>Notes:</strong> <span id="displayNotes"></span></p>
+            </div>
+            <form id="spotDetailsForm" style="display:none;">
+                <input type="hidden" id="modalSpotId">
+                <label for="modalAircraftType">Aircraft Type:</label>
+                <input type="text" id="modalAircraftType" name="aircraftType" required>
+                <label for="modalOperator">Operator:</label>
+                <input type="text" id="modalOperator" name="operator">
+                <label for="modalAircraftId">Aircraft ID:</label>
+                <input type="text" id="modalAircraftId" name="aircraftId">
+                <label for="modalFlightNumber">Flight Number:</label>
+                <input type="text" id="modalFlightNumber" name="flightNumber">
+                <label for="modalDateSpotted">Date Spotted:</label>
+                <input type="date" id="modalDateSpotted" name="dateSpotted">
+                <label for="modalLocation">Location:</label>
+                <input type="text" id="modalLocation" name="location">
+                <label for="modalOrigin">Origin:</label>
+                <input type="text" id="modalOrigin" name="origin">
+                <label for="modalDestination">Destination:</label>
+                <input type="text" id="modalDestination" name="destination">
+                <label for="modalNotes">Notes:</label>
+                <textarea id="modalNotes" name="notes"></textarea>
+                <input type="submit" value="Save Changes">
+                <button type="button" id="cancelEditBtn" class="edit-btn">Cancel</button>
+            </form>
+            <div class="button-row">
+                <button type="button" id="editDetailsBtn">Edit</button>
+            </div>
+            <div class="button-row">
+                <button type="button" class="delete-btn" id="deleteSpotBtn">Delete</button>
+                <button type="button" id="viewPhotosBtn">View Photos</button>
+                <button type="button" id="exportSingleLogbookBtn">Export Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addSpotModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="addSpotClose">&times;</span>
+            <h2>Add a New Spot</h2>
+            <form id="spotForm">
+                <label for="aircraftType">Aircraft Type:</label>
+                <input type="text" id="aircraftType" name="aircraftType" required>
+                <label for="operator">Operator:</label>
+                <input type="text" id="operator" name="operator">
+                <label for="aircraftId">Aircraft ID:</label>
+                <input type="text" id="aircraftId" name="aircraftId">
+                <label for="flightNumber">Flight Number:</label>
+                <input type="text" id="flightNumber" name="flightNumber">
+                <label for="dateSpotted">Date Spotted:</label>
+                <input type="date" id="dateSpotted" name="dateSpotted">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location">
+                <label for="origin">Origin:</label>
+                <input type="text" id="origin" name="origin">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination">
+                <label for="notes">Notes:</label>
+                <textarea id="notes" name="notes"></textarea>
+                <label for="photos">Photos:</label>
+                <input type="file" id="photos" name="photos" accept="image/*" multiple>
+                <input type="submit" value="Add Spot">
+            </form>
+        </div>
+    </div>
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="largeImage" src="" alt="Large Image" style="width:100%; height:100%; object-fit:contain;">
+            <div id="imageDetails">
+                <!-- Entry details will be displayed here -->
+                <p id="aircraftTypeRow"><strong>Aircraft Type:</strong> <span id="aircraftType"></span></p>
+                <p id="operatorRow"><strong>Operator:</strong> <span id="operator"></span></p>
+                <p id="aircraftIdRow"><strong>Aircraft ID:</strong> <span id="aircraftId"></span></p>
+                <p id="flightNumberRow"><strong>Flight Number:</strong> <span id="flightNumber"></span></p>
+                <p id="dateSpottedRow"><strong>Date Spotted:</strong> <span id="dateSpotted"></span></p>
+                <p id="locationRow"><strong>Location:</strong> <span id="location"></span></p>
+                <p id="routeRow"><strong>Route:</strong> <span id="origin"></span> &rarr; <span id="destination"></span>
+                </p>
+                <p id="notesRow"><strong>Notes:</strong> <span id="notes"></span></p>
+            </div>
+            <div class="nav-buttons">
+                <button id="prevPhoto">&larr; Back</button>
+                <button id="publishPhoto">Publish</button>
+                <button id="nextPhoto">Forward &rarr;</button>
+            </div>
+        </div>
+    </div>
+    <div id="publicImageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="publicLargeImage" src="" alt="Large Image" style="width:100%; height:100%; object-fit:contain;">
+            <div id="publicImageDetails">
+                <!-- Entry details and username will be displayed here -->
+                <p id="publicAircraftTypeRow"><strong>Aircraft Type:</strong> <span id="publicAircraftType"></span></p>
+                <p id="publicOperatorRow"><strong>Operator:</strong> <span id="publicOperator"></span></p>
+                <p id="publicAircraftIdRow"><strong>Aircraft ID:</strong> <span id="publicAircraftId"></span></p>
+                <p id="publicFlightNumberRow"><strong>Flight Number:</strong> <span id="publicFlightNumber"></span></p>
+                <p id="publicDateSpottedRow"><strong>Date Spotted:</strong> <span id="publicDateSpotted"></span></p>
+                <p id="publicLocationRow"><strong>Location:</strong> <span id="publicLocation"></span></p>
+                <p id="publicRouteRow"><strong>Route:</strong> <span id="publicOrigin"></span> &rarr; <span
+                        id="publicDestination"></span></p>
+                <p id="publicNotesRow"><strong>Notes:</strong> <span id="publicNotes"></span></p>
+                <p><strong>Username:</strong> <span id="publicUsername"></span></p>
+            </div>
+            <div class="nav-buttons">
+                <button id="prevPublicPhoto">&larr; Back</button>
+                <button id="deletePublicImage">Delete</button>
+                <button id="nextPublicPhoto">Forward &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="spinner" id="loadingSpinner"></div>
+    <script>
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar.style.width === "250px") {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById("sidebar").style.width = "250px";
+            document.body.style.marginLeft = "250px";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").style.width = "0";
+            document.body.style.marginLeft = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        document.addEventListener('click', function (event) {
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("overlay");
+            if (event.target !== sidebar && !sidebar.contains(event.target) && event.target !== document.getElementById("hamburger-menu")) {
+                closeSidebar();
+            }
+        });
+
+        document.querySelectorAll('#sidebar a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        // Show the hamburger menu after login
+        function showHamburgerMenu() {
+            document.getElementById("hamburger-menu").style.display = "block";
+        }
+
+        function unsubscribeAllListeners() {
+            unsubscribeListeners.forEach(unsubscribe => unsubscribe());
+            unsubscribeListeners.length = 0; // Clear the array
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            unsubscribeAllListeners(); // Unsubscribe from all listeners
+            firebase.auth().signOut().then(() => {
+                // Sign-out successful
+                localStorage.removeItem('activeContainer'); // Clear the active container
+                document.querySelector('.login-page').style.display = 'flex';
+                document.querySelector('.logbook').style.display = 'none';
+                document.querySelector('.gallery').style.display = 'none';
+                document.querySelector('.public-gallery').style.display = 'none';
+                document.querySelector('.account').style.display = 'none';
+                document.getElementById("hamburger-menu").style.display = "none";
+            }).catch((error) => {
+                // An error happened during logout
+                console.error('Logout Error:', error);
+            });
+        });
+
+        const logbookNav = document.getElementById('logbookNav');
+        const galleryNav = document.getElementById('galleryNav');
+        const publicGalleryNav = document.getElementById('publicGalleryNav');
+        const accountNav = document.getElementById('accountNav');
+
+        const logbookSection = document.querySelector('.logbook');
+        const gallerySection = document.querySelector('.gallery');
+        const publicGallerySection = document.querySelector('.public-gallery');
+        const accountSection = document.querySelector('.account');
+        const loginPage = document.querySelector('.login-page');
+        const signupPage = document.querySelector('.signup-page');
+
+        logbookNav.onclick = function () {
+            logbookSection.style.display = 'block';
+            gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'none';
+            accountSection.style.display = 'none';
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isLogbookLoaded) {
+                subscribeToLogbooks(auth.currentUser.uid);
+                isLogbookLoaded = true;
+            }
+            isGalleryLoaded = false;
+            isPublicGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'logbook');
+        };
+
+        galleryNav.onclick = function () {
+            logbookSection.style.display = 'none';
+            gallerySection.style.display = 'block';
+            publicGallerySection.style.display = 'none';
+            accountSection.style.display = 'none';
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isGalleryLoaded) {
+                loadAllGalleries(auth.currentUser.uid);
+                isGalleryLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isPublicGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'gallery');
+        };
+
+        publicGalleryNav.onclick = function () {
+            logbookSection.style.display = 'none';
+            gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'block';
+            accountSection.style.display = 'none';
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isPublicGalleryLoaded) {
+                loadPublicGallery();
+                isPublicGalleryLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isGalleryLoaded = false;
+            isAccountLoaded = false;
+            localStorage.setItem('activeContainer', 'public-gallery');
+        };
+
+        accountNav.onclick = function () {
+            logbookSection.style.display = 'none';
+            gallerySection.style.display = 'none';
+            publicGallerySection.style.display = 'none';
+            accountSection.style.display = 'block';
+            signupPage.style.display = 'none'; // Hide signup page
+            if (!isAccountLoaded) {
+                loadAccountDetails();
+                isAccountLoaded = true;
+            }
+            isLogbookLoaded = false;
+            isGalleryLoaded = false;
+            isPublicGalleryLoaded = false;
+            localStorage.setItem('activeContainer', 'account');
+        };
+
+
+        function hideAllSections() {
+            document.querySelector('.logbook').style.display = 'none';
+            document.querySelector('.gallery').style.display = 'none';
+            document.querySelector('.public-gallery').style.display = 'none';
+            document.querySelector('.account').style.display = 'none';
+            document.querySelector('.signup-page').style.display = 'none'; // Hide signup page
+        }
+
+        let isLogbookLoaded = false;
+        let isGalleryLoaded = false;
+        let isPublicGalleryLoaded = false;
+        let isAccountLoaded = false;
+
+        function loadActiveContainer() {
+            hideAllSections();
+            const activeContainer = localStorage.getItem('activeContainer') || 'logbook';
+            if (activeContainer === 'logbook') {
+                logbookSection.style.display = 'block';
+                if (!isLogbookLoaded) {
+                    subscribeToLogbooks(auth.currentUser.uid);
+                    isLogbookLoaded = true;
+                }
+            } else if (activeContainer === 'gallery') {
+                gallerySection.style.display = 'block';
+                if (!isGalleryLoaded) {
+                    loadAllGalleries(auth.currentUser.uid);
+                    isGalleryLoaded = true;
+                }
+            } else if (activeContainer === 'public-gallery') {
+                publicGallerySection.style.display = 'block';
+                if (!isPublicGalleryLoaded) {
+                    loadPublicGallery();
+                    isPublicGalleryLoaded = true;
+                }
+            } else if (activeContainer === 'account') {
+                accountSection.style.display = 'block';
+                if (!isAccountLoaded) {
+                    loadAccountDetails();
+                    isAccountLoaded = true;
+                }
+            }
+        }
+
+        // Remember Me feature
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+
+        // Check if user credentials are saved in localStorage
+        if (localStorage.getItem('email') && localStorage.getItem('password')) {
+            loginEmail.value = localStorage.getItem('email');
+            loginPassword.value = localStorage.getItem('password');
+            rememberMeCheckbox.checked = true;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+
+                    // Check if email is verified
+                    if (user.emailVerified) {
+                        if (rememberMe) {
+                            localStorage.setItem('email', email);
+                            localStorage.setItem('password', password);
+                        } else {
+                            localStorage.removeItem('email');
+                            localStorage.removeItem('password');
+                        }
+                        loginPage.style.display = 'none';
+                        signupPage.style.display = 'none';
+                        logbookSection.style.display = 'block';
+                        subscribeToLogbooks(user.uid);
+                    } else {
+                        alert('Please verify your email before logging in.');
+                        auth.signOut();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error logging in: ", error);
+                    const loginErrorMessage = document.getElementById('loginErrorMessage');
+                    if (error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
+                        loginErrorMessage.textContent = 'Invalid email or password. Please try again.';
+                    } else if (error.code === "auth/too-many-requests") {
+                        loginErrorMessage.textContent = 'Too many failed login attempts. Please try again later or reset your password.';
+                    } else {
+                        loginErrorMessage.textContent = 'An error occurred. Please try again later.';
+                    }
+                    loginErrorMessage.style.display = 'block'; // Show the error message
+                });
+        });
+
+        document.getElementById('forgotPasswordLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+
+            if (email) {
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        alert('Password reset email sent!');
+                    })
+                    .catch(error => {
+                        console.error("Error sending password reset email:", error);
+                    });
+            } else {
+                alert('Please enter your email address first.');
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+
+            validateUsername(username).then(isValid => {
+                if (isValid) {
+                    event.preventDefault();
+
+                    const firstNameElem = document.getElementById('signupFirstName');
+                    const lastNameElem = document.getElementById('signupLastName');
+                    const emailElem = document.getElementById('signupEmail');
+                    const passwordElem = document.getElementById('signupPassword');
+
+                    // Check if all elements are available
+                    if (!firstNameElem || !lastNameElem || !emailElem || !passwordElem) {
+                        console.error('One or more form elements are missing');
+                        return;
+                    }
+
+                    const firstName = firstNameElem.value;
+                    const lastName = lastNameElem.value;
+                    const email = emailElem.value;
+                    const password = passwordElem.value;
+
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .then(userCredential => {
+                            const user = userCredential.user;
+
+                            // Send verification email
+                            user.sendEmailVerification().then(() => {
+                                alert('Verification email sent! Please check your inbox.');
+                            }).catch(error => {
+                                console.error("Error sending verification email:", error);
+                            });
+
+                            // Add user data to Firestore
+                            db.collection('users').doc(user.uid).set({
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email
+                            }).then(() => {
+                                signupPage.style.display = 'none';
+                                loginPage.style.display = 'flex';
+                            }).catch(error => {
+                                console.error("Error adding user to Firestore:", error);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error signing up: ", error);
+                        });
+                } else {
+                    alert('Username is already taken.');
+                }
+            });
+        });
+
+        document.getElementById('spotForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            showSpinner();
+            try {
+                const form = event.target;
+                const userId = auth.currentUser.uid;
+                const aircraftType = form.aircraftType.value;
+                const operator = form.operator.value;
+                const aircraftId = form.aircraftId.value;
+                const flightNumber = form.flightNumber.value;
+                const dateSpotted = form.dateSpotted.value;
+                const location = form.location.value;
+                const origin = form.origin.value;
+                const destination = form.destination.value;
+                const notes = form.notes.value; // Get the notes value
+                const files = form.photos.files;
+
+                // Generate entryName
+                const entryName = generateEntryName({
+                    aircraftType,
+                    flightNumber,
+                    aircraftId,
+                    dateSpotted
+                });
+
+                // Close the modal immediately
+                const addSpotModal = document.getElementById("addSpotModal");
+                addSpotModal.style.display = "none";
+
+                const logbookDocRef = await db.collection('users').doc(userId).collection('logbooks').add({
+                    aircraftType: aircraftType,
+                    operator: operator,
+                    aircraftId: aircraftId,
+                    flightNumber: flightNumber,
+                    dateSpotted: dateSpotted,
+                    location: location,
+                    origin: origin,
+                    destination: destination,
+                    notes: notes, // Add notes to the logbook details
+                    entryName: entryName, // Add entryName to the logbook details
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const galleryDocRef = await db.collection('users').doc(userId).collection('logbooks').doc(logbookDocRef.id).collection('galleries').add({
+                    title: entryName, // Use entryName for the gallery title
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const photoUrls = [];
+                for (const file of files) {
+                    const storageRef = storage.ref().child(`users/${userId}/logbooks/${logbookDocRef.id}/galleries/${galleryDocRef.id}/${file.name}`);
+                    await storageRef.put(file);
+                    const photoUrl = await storageRef.getDownloadURL();
+                    photoUrls.push(photoUrl);
+                    await db.collection('users').doc(userId).collection('logbooks').doc(logbookDocRef.id).collection('galleries').doc(galleryDocRef.id).collection('photos').add({
+                        photoUrl: photoUrl,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Reload the entries to display the new ones on top
+                subscribeToLogbooks(userId);
+                loadAllGalleries(userId);
+
+                form.reset();
+            } finally {
+                hideSpinner();
+            }
+        });
+
+        document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+            const user = auth.currentUser;
+            if (!user) {
+                console.error("No user is signed in");
+                return;
+            }
+
+            // Confirm with the user before deleting
+            if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                return;
+            }
+
+            const userId = user.uid;
+
+            // Delete user's Firestore document and subcollections
+            async function deleteUserData(userId) {
+                const userDocRef = db.collection('users').doc(userId);
+
+                // Get all logbooks for the user
+                const logbooksSnapshot = await userDocRef.collection('logbooks').get();
+                const deleteLogbookPromises = logbooksSnapshot.docs.map(async logbookDoc => {
+                    const logbookId = logbookDoc.id;
+
+                    // Get all galleries for each logbook
+                    const galleriesSnapshot = await logbookDoc.ref.collection('galleries').get();
+                    const deleteGalleryPromises = galleriesSnapshot.docs.map(async galleryDoc => {
+                        const galleryId = galleryDoc.id;
+
+                        // Get all photos for each gallery
+                        const photosSnapshot = await galleryDoc.ref.collection('photos').get();
+                        const deletePhotoPromises = photosSnapshot.docs.map(async photoDoc => {
+                            const photoUrl = photoDoc.data().photoUrl;
+                            const storageRef = storage.refFromURL(photoUrl);
+
+                            // Delete photo from storage
+                            await storageRef.delete();
+
+                            // Delete photo document from Firestore
+                            return photoDoc.ref.delete();
+                        });
+
+                        // Wait for all photos to be deleted
+                        await Promise.all(deletePhotoPromises);
+
+                        // Delete gallery document
+                        return galleryDoc.ref.delete();
+                    });
+
+                    // Wait for all galleries to be deleted
+                    await Promise.all(deleteGalleryPromises);
+
+                    // Delete logbook document
+                    return logbookDoc.ref.delete();
+                });
+
+                // Wait for all logbooks to be deleted
+                await Promise.all(deleteLogbookPromises);
+
+                // Delete user document
+                return userDocRef.delete();
+            }
+
+            // Delete user authentication and user data
+            deleteUserData(userId).then(() => {
+                user.delete().then(() => {
+                    alert("Account deleted successfully.");
+                    window.location.reload();
+                }).catch(error => {
+                    console.error("Error deleting user: ", error);
+                    alert("Error deleting user. Please try again.");
+                });
+            }).catch(error => {
+                console.error("Error deleting user data: ", error);
+                alert("Error deleting user data. Please try again.");
+            });
+        });
+
+        document.getElementById('exportLogbookBtn').addEventListener('click', exportLogbooks);
+        document.getElementById('exportGalleriesBtn').addEventListener('click', exportGalleries);
+        document.getElementById('exportAllBtn').addEventListener('click', exportAll);
+
+        async function exportLogbooks() {
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                logbooksSnapshot.forEach(doc => {
+                    const logbook = doc.data();
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
+
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${logbook.entryName}.txt`, formattedContent.trim());
+                });
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, 'logbooks.zip');
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        document.getElementById('exportSingleLogbookBtn').onclick = function () {
+            const spotId = document.getElementById('modalSpotId').value;
+            exportSingleLogbook(spotId);
+        };
+
+        async function exportSingleLogbook(logbookId) {
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+                const logbookDoc = await logbookDocRef.get();
+                if (logbookDoc.exists) {
+                    const logbook = logbookDoc.data();
+                    const headerText = logbook.entryName;
+
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
+
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${headerText}.txt`, formattedContent.trim());
+
+                    const galleriesSnapshot = await logbookDocRef.collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        const photoSnapshot = await logbookDocRef.collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+                    }
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, `${logbookDoc.data().entryName}.zip`);
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        async function exportGalleries() {
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                for (const logbookDoc of logbooksSnapshot.docs) {
+                    const logbook = logbookDoc.data();
+                    const logbookId = logbookDoc.id;
+                    const headerText = logbook.entryName;
+
+                    const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        // Get photos in each gallery
+                        const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+                    }
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, 'galleries.zip');
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        async function exportAll() {
+            showSpinner();
+            try {
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbooksSnapshot = await db.collection('users').doc(userId).collection('logbooks').get();
+                for (const logbookDoc of logbooksSnapshot.docs) {
+                    const logbook = logbookDoc.data();
+                    const logbookId = logbookDoc.id;
+                    const headerText = logbook.entryName;
+
+                    let formattedContent = `**${logbook.entryName}**\n\n`;
+
+                    if (logbook.aircraftType) {
+                        formattedContent += `Aircraft Type: ${logbook.aircraftType}\n`;
+                    }
+                    if (logbook.operator) {
+                        formattedContent += `Operator: ${logbook.operator}\n`;
+                    }
+                    if (logbook.aircraftId) {
+                        formattedContent += `Aircraft ID: ${logbook.aircraftId}\n`;
+                    }
+                    if (logbook.flightNumber) {
+                        formattedContent += `Flight Number: ${logbook.flightNumber}\n`;
+                    }
+                    if (logbook.dateSpotted) {
+                        formattedContent += `Date Spotted: ${logbook.dateSpotted}\n`;
+                    }
+                    if (logbook.location) {
+                        formattedContent += `Location: ${logbook.location}\n`;
+                    }
+                    if (logbook.origin) {
+                        formattedContent += `Origin: ${logbook.origin}\n`;
+                    }
+                    if (logbook.destination) {
+                        formattedContent += `Destination: ${logbook.destination}\n`;
+                    }
+                    if (logbook.notes) {
+                        formattedContent += `Notes: ${logbook.notes}\n`;
+                    }
+
+                    zip.file(`${logbook.entryName}.txt`, formattedContent.trim());
+
+                    const galleriesSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        // Get photos in each gallery
+                        const photoSnapshot = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryDoc.id).collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+                    }
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                saveAs(content, 'all_data.zip');
+            } finally {
+                hideSpinner();
+            }
+        }
+
+        function generateEntryName(logbook) {
+            const aircraftType = logbook.aircraftType || '';
+            const flightNumber = logbook.flightNumber || '';
+            const aircraftId = logbook.aircraftId || '';
+            const dateSpotted = logbook.dateSpotted ? `(${logbook.dateSpotted})` : '';
+
+            let headerText = aircraftType;
+            if (flightNumber || aircraftId) {
+                headerText += ` - ${flightNumber || aircraftId} `;
+            }
+            headerText += ` ${dateSpotted}`.trim();
+
+            return headerText;
+        }
+
+        document.getElementById('resendVerificationLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            if (!email) {
+                alert('Please enter your email address first.');
+                return;
+            }
+
+            // Sign in the user temporarily to check if the email is verified
+            const password = document.getElementById('loginPassword').value;
+            if (!password) {
+                alert('Please enter your password first.');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password).then(userCredential => {
+                const user = userCredential.user;
+                if (user.emailVerified) {
+                    alert('This email is already verified.');
+                } else {
+                    user.sendEmailVerification().then(() => {
+                        alert('Verification email resent! Please check your inbox.');
+                    }).catch(error => {
+                        console.error("Error resending verification email:", error);
+                        alert('Error resending verification email. Please try again later.');
+                    });
+                }
+                // Sign out the user after checking
+                auth.signOut();
+            }).catch(error => {
+                console.error("Error signing in: ", error);
+                alert('Error signing in. Please make sure your email and password are correct.');
+            });
+        });
+
+        function loadAllGalleries(userId) {
+            const galleriesContainer = document.getElementById('galleries');
+            galleriesContainer.innerHTML = ''; // Clear existing galleries to prevent duplicates
+
+            db.collection('users').doc(userId).collection('logbooks')
+                .orderBy('createdAt', 'asc')
+                .get().then(logbooksSnapshot => {
+                    logbooksSnapshot.forEach(logbookDoc => {
+                        subscribeToGalleries(userId, logbookDoc.id);
+                    });
+                });
+        }
+
+        function updatePhotoCount(userId, logbookId, element) {
+            db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get()
+                .then(snapshot => {
+                    let totalPhotos = 0;
+                    const promises = snapshot.docs.map(galleryDoc =>
+                        galleryDoc.ref.collection('photos').get().then(photoSnapshot => {
+                            totalPhotos += photoSnapshot.size;
+                        })
+                    );
+
+                    Promise.all(promises).then(() => {
+                        element.textContent = `${totalPhotos} photo(s)`;
+                    });
+                });
+        }
+
+        function showGallery(userId, logbookId) {
+            // Hide other sections and show gallery section
+            logbookSection.style.display = 'none';
+            accountSection.style.display = 'none';
+            gallerySection.style.display = 'block';
+
+            // Clear existing galleries
+            const galleriesContainer = document.getElementById('galleries');
+            galleriesContainer.innerHTML = '';
+
+            // Load the galleries for the specified logbook
+            subscribeToGalleries(userId, logbookId);
+        }
+
+        // Function to add logbook entry with search and filter support
+        function addLogbookEntry(doc, userId) {
+            const logbook = doc.data();
+            const entryName = logbook.entryName || generateEntryName(logbook);
+
+            const widget = document.createElement('div');
+            widget.className = 'spot-widget';
+            widget.setAttribute('data-id', doc.id);
+            widget.setAttribute('data-aircraft-type', logbook.aircraftType.toLowerCase());
+            widget.setAttribute('data-operator', logbook.operator ? logbook.operator.toLowerCase() : '');
+            widget.setAttribute('data-aircraft-id', logbook.aircraftId.toLowerCase());
+            widget.setAttribute('data-flight-number', logbook.flightNumber.toLowerCase());
+            widget.setAttribute('data-date-spotted', logbook.dateSpotted ? logbook.dateSpotted.toLowerCase() : '');
+            widget.setAttribute('data-location', logbook.location ? logbook.location.toLowerCase() : '');
+            widget.setAttribute('data-origin', logbook.origin ? logbook.origin.toLowerCase() : '');
+            widget.setAttribute('data-destination', logbook.destination ? logbook.destination.toLowerCase() : '');
+            widget.setAttribute('data-notes', logbook.notes ? logbook.notes.toLowerCase() : '');
+
+            let locationHTML = '';
+            if (logbook.location) {
+                locationHTML = `<p>Location: ${logbook.location}</p>`;
+            }
+
+            widget.innerHTML = `
+        <h3>${entryName}</h3>
+        ${locationHTML}
+        <p class="photo-count" data-logbook-id="${doc.id}" data-user-id="${userId}">0 photo(s)</p>
+    `;
+
+            const logbookEntries = document.getElementById('logbookEntries');
+            logbookEntries.insertBefore(widget, logbookEntries.firstChild);
+
+            // Add click event listener to the widget
+            widget.onclick = function () {
+                const spotId = widget.getAttribute('data-id');
+                displaySpotDetails(spotId, userId);
+            };
+
+            // Update the number of photos in the logbook entry
+            const photoCountElement = widget.querySelector('.photo-count');
+            updatePhotoCount(userId, doc.id, photoCountElement);
+        }
+
+        function addGallery(doc, logbookId) {
+            const gallery = doc.data();
+            const logbookDocRef = db.collection('users').doc(auth.currentUser.uid).collection('logbooks').doc(logbookId);
+            logbookDocRef.get().then(logbookDoc => {
+                if (logbookDoc.exists) {
+                    const logbook = logbookDoc.data();
+                    const entryName = logbook.entryName || generateEntryName(logbook);
+
+                    const galleryContainer = document.createElement('div');
+                    galleryContainer.className = 'gallery-container';
+                    galleryContainer.setAttribute('data-logbook-id', logbookId);
+                    galleryContainer.setAttribute('data-gallery-id', doc.id);
+                    galleryContainer.setAttribute('data-aircraft-type', logbook.aircraftType.toLowerCase());
+                    galleryContainer.setAttribute('data-operator', logbook.operator ? logbook.operator.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-aircraft-id', logbook.aircraftId.toLowerCase());
+                    galleryContainer.setAttribute('data-flight-number', logbook.flightNumber.toLowerCase());
+                    galleryContainer.setAttribute('data-date-spotted', logbook.dateSpotted ? logbook.dateSpotted.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-location', logbook.location ? logbook.location.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-origin', logbook.origin ? logbook.origin.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-destination', logbook.destination ? logbook.destination.toLowerCase() : '');
+                    galleryContainer.setAttribute('data-notes', logbook.notes ? logbook.notes.toLowerCase() : '');
+                    galleryContainer.innerHTML = `
+                <div class="gallery-folder" onclick="toggleGallery(this)">
+                    <h3>${entryName}</h3>
+                </div>
+                <div class="gallery-photos">
+                    <!-- Photos will be added here dynamically -->
+                </div>
+                <div class="gallery-actions">
+                    <input type="file" class="add-photo" accept="image/*" multiple>
+                    <button class="delete-gallery" onclick="deleteGallery('${doc.id}', '${logbookId}')">Delete Gallery</button>
+                    <button class="export-gallery" onclick="exportSingleGallery('${logbookId}', '${doc.id}')">Export Gallery</button>
+                </div>
+            `;
+                    const galleries = document.getElementById('galleries');
+                    galleries.insertBefore(galleryContainer, galleries.firstChild);
+                    const addPhotoInput = galleryContainer.querySelector('.add-photo');
+
+                    addPhotoInput.addEventListener('change', async function () {
+                        const newFiles = Array.from(addPhotoInput.files);
+                        const userId = auth.currentUser.uid;
+                        const galleryId = galleryContainer.getAttribute('data-gallery-id');
+                        const newPhotos = [];
+
+                        showSpinner(); // Show spinner before uploading photos
+
+                        try {
+                            for (const file of newFiles) {
+                                const storageRef = storage.ref().child(`users/${userId}/logbooks/${logbookId}/galleries/${galleryId}/${file.name}`);
+                                await storageRef.put(file);
+                                const photoUrl = await storageRef.getDownloadURL();
+                                newPhotos.push(photoUrl);
+                                await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos').add({
+                                    photoUrl: photoUrl,
+                                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+
+                            // Update the photo count in the corresponding logbook entry
+                            const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
+                            updatePhotoCount(userId, logbookId, photoCountElement);
+                        } catch (error) {
+                            console.error("Error uploading photos: ", error);
+                        } finally {
+                            hideSpinner(); // Hide spinner after photos are uploaded
+                        }
+                    });
+
+                    // Set currentLogbookId and currentGalleryId
+                    galleryContainer.querySelector('.gallery-folder').onclick = () => {
+                        currentLogbookId = logbookId;
+                        currentGalleryId = doc.id;
+                        toggleGallery(galleryContainer);
+                    };
+
+                    subscribeToPhotos(auth.currentUser.uid, logbookId, doc.id);
+                }
+            }).catch(error => {
+                console.error("Error getting logbook document: ", error);
+            });
+        }
+
+        function toggleGallery(galleryContainer) {
+            galleryContainer.classList.toggle('open');
+        }
+
+        // Load public gallery photos
+        function loadPublicGallery() {
+            const publicGalleryGrid = document.getElementById('publicGalleryGrid');
+            publicGalleryGrid.innerHTML = ''; // Clear existing photos
+            publicGalleryPhotos = []; // Clear the previous list of photos
+
+            db.collection('publicGallery').get().then(snapshot => {
+                let index = 0;
+                snapshot.forEach(doc => {
+                    const photo = doc.data();
+                    if (photo && photo.url) {  // Ensure each photo has a URL
+                        photo.id = doc.id; // Store the document ID in the photo object
+                        publicGalleryPhotos.push(photo); // Add photo to the list
+
+                        const img = document.createElement('img');
+                        img.src = photo.url;
+                        img.className = 'gallery-photo';
+                        img.onclick = (function (photo, index) {
+                            return function () {
+                                openPublicImageModal(photo.url, photo, index); // Pass the index
+                            };
+                        })(photo, index);
+                        publicGalleryGrid.appendChild(img);
+
+                        index++; // Increment index manually
+                    } else {
+                        console.error("Photo does not have a URL or is undefined:", doc.id);
+                    }
+                });
+            }).catch(error => {
+                console.error("Error loading public gallery:", error);
+            });
+        }
+
+        function deletePublicImage(docId) {
+            const confirmed = confirm('Are you sure you want to delete this photo? This action cannot be undone.');
+            if (confirmed) {
+                db.collection('publicGallery').doc(docId).delete().then(() => {
+                    alert('Photo deleted successfully!');
+                    document.getElementById('publicImageModal').style.display = 'none';
+                    loadPublicGallery(); // Reload the public gallery to reflect the deletion
+                }).catch(error => {
+                    console.error('Error deleting photo: ', error);
+                    alert('Failed to delete photo. Please try again.');
+                });
+            }
+        }
+
+        function openPublicImageModal(photoUrl, photoData, index) {
+            currentPublicPhotoIndex = index;
+            const imageModal = document.getElementById('publicImageModal');
+            const largeImage = document.getElementById('publicLargeImage');
+            largeImage.src = photoUrl;
+            imageModal.style.display = 'block';
+
+            const imageDetails = document.getElementById('publicImageDetails');
+            imageDetails.innerHTML = ''; // Clear existing details
+
+            // Define the details to display
+            const details = {
+                'Aircraft Type': photoData.details.aircraftType,
+                'Operator': photoData.details.operator,
+                'Aircraft ID': photoData.details.aircraftId,
+                'Flight Number': photoData.details.flightNumber,
+                'Date Spotted': photoData.details.dateSpotted,
+                'Location': photoData.details.location,
+                'Notes': photoData.details.notes
+            };
+
+            // Dynamically add the details to the modal, excluding null fields
+            for (const [label, value] of Object.entries(details)) {
+                if (value) {
+                    const detailRow = document.createElement('p');
+                    detailRow.innerHTML = `<strong>${label}:</strong> ${value}`;
+                    imageDetails.appendChild(detailRow);
+                }
+            }
+
+            // Handle the route separately and place it before the username
+            const originValue = photoData.details.origin;
+            const destinationValue = photoData.details.destination;
+            if (originValue || destinationValue) {
+                const routeRow = document.createElement('p');
+                routeRow.innerHTML = `<strong>Route:</strong> ${originValue || ''} &rarr; ${destinationValue || ''}`;
+                imageDetails.appendChild(routeRow);
+            }
+
+            // Display the username
+            if (photoData.username) {
+                const usernameRow = document.createElement('p');
+                usernameRow.innerHTML = `<strong>Username:</strong> ${photoData.username}`;
+                imageDetails.appendChild(usernameRow);
+            }
+
+            // Show the delete button if the current user is the owner of the photo
+            const deleteButton = document.getElementById('deletePublicImage');
+            const userId = auth.currentUser.uid;
+            if (photoData.userId === userId) {
+                deleteButton.style.display = 'inline';
+                deleteButton.onclick = function () {
+                    deletePublicImage(photoData.id); // Pass the document ID to the delete function
+                };
+            } else {
+                deleteButton.style.display = 'none';
+            }
+
+            updatePublicNavigationButtons();
+        }
+
+        function showNextPublicPhoto() {
+            if (publicGalleryPhotos.length === 0) return;
+            currentPublicPhotoIndex = (currentPublicPhotoIndex + 1) % publicGalleryPhotos.length;
+            const photo = publicGalleryPhotos[currentPublicPhotoIndex];
+            if (photo && photo.url) {
+                openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
+            } else {
+                console.error("Photo or photo URL is not defined for index:", currentPublicPhotoIndex);
+            }
+        }
+
+        function showPreviousPublicPhoto() {
+            if (publicGalleryPhotos.length === 0) return;
+            currentPublicPhotoIndex = (currentPublicPhotoIndex - 1 + publicGalleryPhotos.length) % publicGalleryPhotos.length;
+            const photo = publicGalleryPhotos[currentPublicPhotoIndex];
+            if (photo && photo.url) {
+                openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
+            } else {
+                console.error("Photo or photo URL is not defined for index:", currentPublicPhotoIndex);
+            }
+        }
+
+        function updatePublicNavigationButtons() {
+            const prevButton = document.getElementById('prevPublicPhoto');
+            const nextButton = document.getElementById('nextPublicPhoto');
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
+        }
+
+        // Add event listener for the Publish button
+        document.getElementById('publishPhoto').onclick = function () {
+            const confirmed = confirm('Would you like to publish this photo and its related entry information as well as your username?');
+            if (confirmed) {
+                publishPhoto();
+            }
+        };
+
+        function publishPhoto() {
+            if (currentGalleryPhotos.length === 0) {
+                console.error('No photos available');
+                alert('No photos available to publish.');
+                return;
+            }
+
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            const photoUrl = photoData.photoUrl;
+            const userId = auth.currentUser.uid;
+
+            // Ensure currentLogbookId is defined
+            if (!currentLogbookId) {
+                console.error('currentLogbookId is not defined');
+                alert('Failed to publish photo. Logbook ID is missing.');
+                return;
+            }
+
+            const userRef = db.collection('users').doc(userId);
+            const logbookRef = db.collection('users').doc(userId).collection('logbooks').doc(currentLogbookId);
+
+            // Get user and logbook details
+            Promise.all([userRef.get(), logbookRef.get()])
+                .then(([userDoc, logbookDoc]) => {
+                    const userData = userDoc.data();
+                    const logbookData = logbookDoc.data();
+
+                    // Save photo details to the public collection with references
+                    db.collection('publicGallery').add({
+                        url: photoUrl,
+                        details: logbookData,
+                        username: userData.username,
+                        userId: userId,
+                        userRef: userRef, // Reference to the user document
+                        logbookRef: logbookRef // Reference to the logbook document
+                    }).then(() => {
+                        alert('Photo published successfully!');
+                    }).catch(error => {
+                        console.error('Error publishing photo: ', error);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching user or logbook data: ', error);
+                });
+        }
+
+        // Validate username in sign-up and account update forms
+        function validateUsername(username) {
+            return db.collection('users').where('username', '==', username).get().then(snapshot => {
+                return snapshot.empty; // If empty, username is not taken
+            });
+        }
+
+        // Function to filter logbook entries based on search input and filter dropdown
+        function filterLogbook() {
+            const searchValue = document.getElementById('logbookSearchBar').value.toLowerCase();
+            const filterValue = document.getElementById('logbookFilterDropdown').value;
+            const logbookEntries = document.getElementById('logbookEntries').children;
+
+            Array.from(logbookEntries).forEach(entry => {
+                let textToSearch = '';
+
+                switch (filterValue) {
+                    case 'aircraftType':
+                        textToSearch = entry.getAttribute('data-aircraft-type');
+                        break;
+                    case 'operator':
+                        textToSearch = entry.getAttribute('data-operator');
+                        break;
+                    case 'aircraftId':
+                        textToSearch = entry.getAttribute('data-aircraft-id');
+                        break;
+                    case 'flightNumber':
+                        textToSearch = entry.getAttribute('data-flight-number');
+                        break;
+                    case 'dateSpotted':
+                        textToSearch = entry.getAttribute('data-date-spotted');
+                        break;
+                    case 'location':
+                        textToSearch = entry.getAttribute('data-location');
+                        break;
+                    case 'origin':
+                        textToSearch = entry.getAttribute('data-origin');
+                        break;
+                    case 'destination':
+                        textToSearch = entry.getAttribute('data-destination');
+                        break;
+                    case 'notes':
+                        textToSearch = entry.getAttribute('data-notes');
+                        break;
+                    default:
+                        textToSearch = `
+                ${entry.getAttribute('data-aircraft-type')} 
+                ${entry.getAttribute('data-operator')} 
+                ${entry.getAttribute('data-aircraft-id')} 
+                ${entry.getAttribute('data-flight-number')} 
+                ${entry.getAttribute('data-date-spotted')} 
+                ${entry.getAttribute('data-location')} 
+                ${entry.getAttribute('data-origin')} 
+                ${entry.getAttribute('data-destination')} 
+                ${entry.getAttribute('data-notes')}
+            `;
+                }
+
+                if (textToSearch.includes(searchValue)) {
+                    entry.style.display = '';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+
+        const unsubscribeListeners = [];
+
+        function subscribeToLogbooks(userId) {
+            const unsubscribe = db.collection('users').doc(userId).collection('logbooks')
+                .orderBy('createdAt', 'asc')
+                .onSnapshot(querySnapshot => {
+                    const logbookEntries = document.getElementById('logbookEntries');
+                    logbookEntries.innerHTML = '';
+                    querySnapshot.forEach(doc => {
+                        addLogbookEntry(doc, userId);
+                        // Update associated publicGallery documents
+                        updatePublicGallery(doc.id, doc.data(), userId);
+                    });
+                });
+            unsubscribeListeners.push(unsubscribe);
+        }
+
+        function subscribeToGalleries(userId, logbookId) {
+            const unsubscribe = db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(gallerySnapshot => {
+                    const galleriesContainer = document.getElementById('galleries');
+                    galleriesContainer.innerHTML = ''; // Clear existing galleries to prevent duplicates
+                    gallerySnapshot.forEach(galleryDoc => {
+                        addGallery(galleryDoc, logbookId);
+                    });
+                });
+            unsubscribeListeners.push(unsubscribe);
+        }
+
+        function subscribeToPhotos(userId, logbookId, galleryId) {
+            const photosCollectionRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos');
+            const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            const unsubscribe = photosCollectionRef.onSnapshot(async snapshot => {
+                const galleryPhotosContainer = document.querySelector(`.gallery-container[data-logbook-id="${logbookId}"][data-gallery-id="${galleryId}"] .gallery-photos`);
+                galleryPhotosContainer.innerHTML = ''; // Clear existing photos
+                currentGalleryPhotos = []; // Clear currentGalleryPhotos
+
+                const logbookDoc = await logbookDocRef.get();
+                const logbookData = logbookDoc.data();
+
+                snapshot.forEach(doc => {
+                    const photoData = { id: doc.id, ...doc.data(), ...logbookData };
+                    currentGalleryPhotos.push(photoData); // Add to currentGalleryPhotos
+                    addPhotoToGallery(photoData, logbookId, galleryId);
+                });
+            });
+
+            unsubscribeListeners.push(unsubscribe);
+        }
+
+        function updatePublicGallery(logbookId, logbookData, userId) {
+            const logbookRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            db.collection('publicGallery').where('logbookRef', '==', logbookRef).get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        doc.ref.update({
+                            details: logbookData
+                        }).catch(error => {
+                            console.error('Error updating public gallery photo details: ', error);
+                        });
+                    });
+                }).catch(error => {
+                    console.error('Error fetching public gallery photos: ', error);
+                });
+        }
+
+        function displaySpotDetails(spotId, userId) {
+            const docRef = db.collection('users').doc(userId).collection('logbooks').doc(spotId);
+            docRef.get().then(doc => {
+                if (doc.exists) {
+                    const logbook = doc.data();
+                    const entryName = logbook.entryName || generateEntryName(logbook);
+
+                    document.getElementById('spotModalHeader').textContent = entryName;
+                    document.getElementById('modalSpotId').value = spotId;
+
+                    const fields = [
+                        { id: 'AircraftType', value: logbook.aircraftType },
+                        { id: 'Operator', value: logbook.operator },
+                        { id: 'AircraftId', value: logbook.aircraftId },
+                        { id: 'FlightNumber', value: logbook.flightNumber },
+                        { id: 'DateSpotted', value: logbook.dateSpotted },
+                        { id: 'Location', value: logbook.location },
+                        { id: 'Origin', value: logbook.origin },
+                        { id: 'Destination', value: logbook.destination },
+                        { id: 'Notes', value: logbook.notes }
+                    ];
+
+                    fields.forEach(field => {
+                        const displayRow = document.getElementById(`display${field.id}Row`);
+                        const displayValue = document.getElementById(`display${field.id}`);
+                        const modalInput = document.getElementById(`modal${field.id}`);
+                        if (displayRow && displayValue) {
+                            if (field.value) {
+                                displayRow.style.display = 'block';
+                                displayValue.textContent = field.value;
+                            } else {
+                                displayRow.style.display = 'none';
+                            }
+                        }
+                        if (modalInput) {
+                            modalInput.value = field.value || '';
+                        }
+                    });
+
+                    // Handle the route separately
+                    const routeRow = document.getElementById('displayRouteRow');
+                    const originValue = logbook.origin;
+                    const destinationValue = logbook.destination;
+
+                    if (routeRow) {
+                        if (originValue || destinationValue) {
+                            routeRow.style.display = 'block';
+                            document.getElementById('displayOrigin').textContent = originValue;
+                            document.getElementById('displayDestination').textContent = destinationValue;
+                        } else {
+                            routeRow.style.display = 'none';
+                        }
+                    }
+
+                    const spotDetailsModal = document.getElementById('spotDetailsModal');
+                    if (spotDetailsModal) {
+                        spotDetailsModal.style.display = "block";
+                    }
+                }
+            }).catch(error => {
+                console.error("Error getting document:", error);
+            });
+        }
+
+        document.getElementById('spotDetailsForm').addEventListener('submit', saveSpotDetails);
+
+        async function saveSpotDetails(event) {
+            event.preventDefault();
+            const form = event.target;
+            const userId = auth.currentUser.uid;
+            const spotId = form.modalSpotId.value;
+            const aircraftType = form.modalAircraftType.value;
+            const operator = form.modalOperator.value;
+            const aircraftId = form.modalAircraftId.value;
+            const flightNumber = form.modalFlightNumber.value;
+            const dateSpotted = form.modalDateSpotted.value;
+            const location = form.modalLocation.value;
+            const origin = form.modalOrigin.value;
+            const destination = form.modalDestination.value;
+            const notes = form.modalNotes.value;
+
+            // Validate that the user is still authenticated
+            if (!userId) {
+                alert("User is not authenticated. Please log in again.");
+                return;
+            }
+
+            try {
+                await db.collection('users').doc(userId).collection('logbooks').doc(spotId).update({
+                    aircraftType: aircraftType,
+                    operator: operator,
+                    aircraftId: aircraftId,
+                    flightNumber: flightNumber,
+                    dateSpotted: dateSpotted,
+                    location: location,
+                    origin: origin,
+                    destination: destination,
+                    notes: notes,
+                    entryName: generateEntryName({
+                        aircraftType,
+                        flightNumber,
+                        aircraftId,
+                        dateSpotted
+                    }) // Update entryName
+                });
+                spotDetailsModal.style.display = "none";
+                cancelEdit();
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                alert("Failed to save changes. Please try again.");
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('spotDetailsDisplay').style.display = 'block';
+            document.getElementById('spotDetailsForm').style.display = 'none';
+            document.querySelector('#spotDetailsForm input[type="submit"]').style.display = 'none';
+            document.getElementById('editDetailsBtn').style.display = 'inline';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        async function deleteSpot(logbookId, confirmDeletion = true) {
+            const userId = auth.currentUser.uid;
+            const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            if (!confirmDeletion || confirm("Are you sure you want to delete this entry and its gallery? This action cannot be undone.")) {
+                showSpinner();
+                try {
+                    // Get all galleries in the logbook
+                    const galleriesSnapshot = await logbookDocRef.collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        await deleteGallery(galleryDoc.id, logbookId, false); // Skip confirmation for gallery
+                    }
+
+                    // Delete logbook document in Firestore
+                    await logbookDocRef.delete();
+                } finally {
+                    hideSpinner();
+                }
+            }
+        }
+
+        // Function to filter gallery entries based on search input and filter dropdown
+        // Function to filter gallery entries based on search input and filter dropdown
+        function filterGalleries() {
+            const searchValue = document.getElementById('gallerySearchBar').value.toLowerCase();
+            const filterValue = document.getElementById('galleryFilterDropdown').value;
+            const galleryEntries = document.getElementById('galleries').children;
+
+            Array.from(galleryEntries).forEach(entry => {
+                let textToSearch = '';
+
+                switch (filterValue) {
+                    case 'aircraftType':
+                        textToSearch = entry.getAttribute('data-aircraft-type');
+                        break;
+                    case 'operator':
+                        textToSearch = entry.getAttribute('data-operator');
+                        break;
+                    case 'aircraftId':
+                        textToSearch = entry.getAttribute('data-aircraft-id');
+                        break;
+                    case 'flightNumber':
+                        textToSearch = entry.getAttribute('data-flight-number');
+                        break;
+                    case 'dateSpotted':
+                        textToSearch = entry.getAttribute('data-date-spotted');
+                        break;
+                    case 'location':
+                        textToSearch = entry.getAttribute('data-location');
+                        break;
+                    case 'origin':
+                        textToSearch = entry.getAttribute('data-origin');
+                        break;
+                    case 'destination':
+                        textToSearch = entry.getAttribute('data-destination');
+                        break;
+                    case 'notes':
+                        textToSearch = entry.getAttribute('data-notes');
+                        break;
+                    default:
+                        textToSearch = `
+                ${entry.getAttribute('data-aircraft-type')} 
+                ${entry.getAttribute('data-operator')} 
+                ${entry.getAttribute('data-aircraft-id')} 
+                ${entry.getAttribute('data-flight-number')} 
+                ${entry.getAttribute('data-date-spotted')} 
+                ${entry.getAttribute('data-location')} 
+                ${entry.getAttribute('data-origin')} 
+                ${entry.getAttribute('data-destination')}
+                ${entry.getAttribute('data-notes')}
+            `;
+                }
+
+                if (textToSearch.includes(searchValue)) {
+                    entry.style.display = '';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+
+        async function exportSingleGallery(logbookId, galleryId) {
+            showSpinner();
+            try{
+                const userId = auth.currentUser.uid;
+                const zip = new JSZip();
+
+                const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+                const logbookDoc = await logbookDocRef.get();
+                if (logbookDoc.exists) {
+                    const logbook = logbookDoc.data();
+                    const headerText = logbook.entryName;
+
+                    const galleryDocRef = logbookDocRef.collection('galleries').doc(galleryId);
+                    const galleryDoc = await galleryDocRef.get();
+                    if (galleryDoc.exists) {
+                        const gallery = galleryDoc.data();
+                        const galleryHeader = gallery.title;
+                        const folder = zip.folder(`${headerText}/${galleryHeader}`);
+
+                        const photoSnapshot = await galleryDocRef.collection('photos').get();
+                        for (const photoDoc of photoSnapshot.docs) {
+                            const photo = photoDoc.data();
+                            const photoUrl = photo.photoUrl;
+                            const photoName = photoUrl.substring(photoUrl.lastIndexOf('%') + 1).split('?')[0]; // Extract file name
+                            const response = await fetch(photoUrl);
+                            const blob = await response.blob();
+                            folder.file(photoName, blob); // Use original file name
+                        }
+
+                        zip.generateAsync({ type: 'blob' }).then(function (content) {
+                            saveAs(content, `gallery.zip`);
+                        });
+                    }
+                }
+            }finally{
+                hideSpinner();
+            }
+        }
+
+        function addPhotoToGallery(photoData, logbookId, galleryId) {
+            const galleryPhotosContainer = document.querySelector(`.gallery-container[data-logbook-id="${logbookId}"][data-gallery-id="${galleryId}"] .gallery-photos`);
+            if (!galleryPhotosContainer) {
+                console.error('Gallery photos container not found'); // Debug log
+                return;
+            }
+
+            // Check if the photo already exists
+            if (galleryPhotosContainer.querySelector(`[data-photo-id="${photoData.id}"]`)) {
+                return; // Photo already added
+            }
+
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'gallery-photo-container';
+            photoContainer.setAttribute('data-photo-id', photoData.id);
+
+            const img = document.createElement('img');
+            img.src = photoData.photoUrl;
+            img.className = 'gallery-photo';
+            img.onclick = () => {
+                currentGalleryPhotos = Array.from(galleryPhotosContainer.children).map(child => child.querySelector('img').photoData);
+                currentPhotoIndex = currentGalleryPhotos.findIndex(photo => photo.photoUrl === photoData.photoUrl);
+                openImageModal(photoData.photoUrl, photoData);
+            };
+            img.photoData = photoData;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-photo';
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = (event) => {
+                event.stopPropagation();
+                if (confirm('Are you sure you want to delete this photo?')) {
+                    deletePhoto(logbookId, galleryId, photoData);
+                }
+            };
+
+            photoContainer.appendChild(img);
+            photoContainer.appendChild(deleteButton);
+            galleryPhotosContainer.appendChild(photoContainer);
+        }
+
+
+        function deletePhoto(logbookId, galleryId, photoData) {
+            const userId = auth.currentUser.uid;
+            db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId).collection('photos')
+                .where('photoUrl', '==', photoData.photoUrl).get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        doc.ref.delete().then(() => {
+                            console.log('Photo successfully deleted!');
+                            // Update the photo count in the corresponding logbook entry
+                            const photoCountElement = document.querySelector(`.photo-count[data-logbook-id="${logbookId}"]`);
+                            updatePhotoCount(userId, logbookId, photoCountElement);
+                        }).catch(error => {
+                            console.error('Error removing photo: ', error);
+                        });
+                    });
+                }).catch(error => {
+                    console.error('Error getting photo for deletion: ', error);
+                });
+        }
+
+        let currentPhotoIndex = 0;
+        let currentPhotoUrls = [];
+
+        let currentPublicPhotoIndex = 0;
+        let publicGalleryPhotos = [];
+
+        let currentLogbookId = null; // Define currentLogbookId
+
+
+        function openImageModal(photoUrl, photoData) {
+            const imageModal = document.getElementById('imageModal');
+            const largeImage = document.getElementById('largeImage');
+            largeImage.src = photoUrl;
+            imageModal.style.display = 'block';
+
+            const imageDetails = document.getElementById('imageDetails');
+            imageDetails.innerHTML = ''; // Clear existing details
+
+            // Define the details to display
+            const details = {
+                'Aircraft Type': photoData.aircraftType,
+                'Operator': photoData.operator,
+                'Aircraft ID': photoData.aircraftId,
+                'Flight Number': photoData.flightNumber,
+                'Date Spotted': photoData.dateSpotted,
+                'Location': photoData.location,
+                'Notes': photoData.notes
+            };
+
+            // Dynamically add the details to the modal, excluding null fields
+            for (const [label, value] of Object.entries(details)) {
+                if (value) {
+                    const detailRow = document.createElement('p');
+                    detailRow.innerHTML = `<strong>${label}:</strong> ${value}`;
+                    imageDetails.appendChild(detailRow);
+                }
+            }
+
+            // Handle the route separately
+            const originValue = photoData.origin;
+            const destinationValue = photoData.destination;
+            if (originValue || destinationValue) {
+                const routeRow = document.createElement('p');
+                routeRow.innerHTML = `<strong>Route:</strong> ${originValue || ''} &rarr; ${destinationValue || ''}`;
+                imageDetails.appendChild(routeRow);
+            }
+
+            updateNavigationButtons();
+        }
+
+        function showNextPhoto() {
+            if (currentGalleryPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex + 1) % currentGalleryPhotos.length;
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            openImageModal(photoData.photoUrl, photoData);
+        }
+
+        function showPreviousPhoto() {
+            if (currentGalleryPhotos.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex - 1 + currentGalleryPhotos.length) % currentGalleryPhotos.length;
+            const photoData = currentGalleryPhotos[currentPhotoIndex];
+            openImageModal(photoData.photoUrl, photoData);
+        }
+
+        function updateNavigationButtons() {
+            const prevButton = document.getElementById('prevPhoto');
+            const nextButton = document.getElementById('nextPhoto');
+            prevButton.style.display = 'block';
+            nextButton.style.display = 'block';
+
+            prevButton.onclick = showPreviousPhoto;
+            nextButton.onclick = showNextPhoto;
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (document.getElementById('imageModal').style.display === 'block') {
+                if (event.key === 'ArrowRight') {
+                    showNextPhoto();
+                } else if (event.key === 'ArrowLeft') {
+                    showPreviousPhoto();
+                }
+            }
+            if (document.getElementById('publicImageModal').style.display === 'block') {
+                if (event.key === 'ArrowRight') {
+                    showNextPublicPhoto();
+                } else if (event.key === 'ArrowLeft') {
+                    showPreviousPublicPhoto();
+                }
+            }
+        });
+
+        document.getElementById('nextPublicPhoto').onclick = showNextPublicPhoto;
+        document.getElementById('prevPublicPhoto').onclick = showPreviousPublicPhoto;
+
+
+        document.getElementById('nextPhoto').onclick = showNextPhoto;
+        document.getElementById('prevPhoto').onclick = showPreviousPhoto;
+
+        async function deleteLogbook(logbookId, confirmDeletion = true) {
+            const userId = auth.currentUser.uid;
+            const logbookDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId);
+
+            if (!confirmDeletion || confirm("Are you sure you want to delete this entry and its gallery? This action cannot be undone.")) {
+                showSpinner();
+                try {
+                    // Get all galleries in the logbook
+                    const galleriesSnapshot = await logbookDocRef.collection('galleries').get();
+                    for (const galleryDoc of galleriesSnapshot.docs) {
+                        await deleteGallery(galleryDoc.id, logbookId, false); // Skip confirmation for gallery
+                    }
+
+                    // Delete logbook document in Firestore
+                    await logbookDocRef.delete();
+                } finally {
+                    hideSpinner();
+                }
+            }
+        }
+
+        async function deleteGallery(galleryId, logbookId, confirmBool = true) {
+            const userId = auth.currentUser.uid;
+            const galleryDocRef = db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').doc(galleryId);
+
+            if (confirmBool == true) {
+                if (confirm("Are you sure you want to delete this gallery and its associated entry? This action cannot be undone.")) {
+                    showSpinner();
+                    try {
+                        // Get all photos in the gallery
+                        const photosSnapshot = await galleryDocRef.collection('photos').get();
+                        for (const photoDoc of photosSnapshot.docs) {
+                            await deletePhoto(userId, logbookId, galleryId, photoDoc.id, photoDoc.data().photoUrl);
+                        }
+
+                        // Delete gallery document in Firestore
+                        await galleryDocRef.delete();
+
+                        // Check if the logbook has any other galleries
+                        const remainingGalleries = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                        if (remainingGalleries.empty) {
+                            // If no other galleries exist, delete the logbook
+                            await deleteLogbook(logbookId, false);
+                        }
+
+                        // Reload the galleries
+                        loadAllGalleries(userId);
+                    } finally {
+                        hideSpinner();
+                    }
+                }
+            }
+            else {
+                showSpinner();
+                try {
+                    // Get all photos in the gallery
+                    const photosSnapshot = await galleryDocRef.collection('photos').get();
+                    for (const photoDoc of photosSnapshot.docs) {
+                        await deletePhoto(userId, logbookId, galleryId, photoDoc.id, photoDoc.data().photoUrl);
+                    }
+
+                    // Delete gallery document in Firestore
+                    await galleryDocRef.delete();
+
+                    // Check if the logbook has any other galleries
+                    const remainingGalleries = await db.collection('users').doc(userId).collection('logbooks').doc(logbookId).collection('galleries').get();
+                    if (remainingGalleries.empty) {
+                        // If no other galleries exist, delete the logbook
+                        await deleteLogbook(logbookId, false);
+                    }
+
+                    // Reload the galleries
+                    loadAllGalleries(userId);
+                } finally {
+                    hideSpinner();
+                }
+            }
+        }
+
+        document.getElementById('editDetailsBtn').onclick = function () {
+            document.getElementById('spotDetailsDisplay').style.display = 'none';
+            document.getElementById('spotDetailsForm').style.display = 'block';
+            document.querySelector('#spotDetailsForm input[type="submit"]').style.display = 'inline';
+            document.getElementById('editDetailsBtn').style.display = 'none';
+            document.getElementById('cancelEditBtn').style.display = 'inline';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const spotDetailsModal = document.getElementById("spotDetailsModal");
+            const spotDetailsClose = document.querySelector("#spotDetailsModal .close");
+            const addSpotModal = document.getElementById("addSpotModal");
+            const addSpotClose = document.querySelector("#addSpotModal .close");
+            const imageModal = document.getElementById("imageModal");
+            const imageModalClose = document.querySelector("#imageModal .close");
+
+            firebase.auth().onAuthStateChanged(function (user) {
+                loadingSpinner.style.display = 'none'; // Hide the spinner once authentication state is known
+                document.querySelectorAll('.hidden').forEach(element => element.classList.remove('hidden')); // Remove hidden class once we know the auth state
+
+                // Reset flags on authentication state change
+                isLogbookLoaded = false;
+                isGalleryLoaded = false;
+                isPublicGalleryLoaded = false;
+                isAccountLoaded = false;
+
+                if (user) {
+                    // User is signed in
+                    showHamburgerMenu();
+                    document.querySelector('.login-page').style.display = 'none';
+                    loadActiveContainer(); // Call the function to load the last active container
+                } else {
+                    // No user is signed in
+                    hideAllSections();
+                    document.querySelector('.login-page').style.display = 'flex';
+                    document.getElementById("hamburger-menu").style.display = "none";
+                }
+            });
+
+            if (spotDetailsClose) {
+                spotDetailsClose.onclick = function () {
+                    spotDetailsModal.style.display = "none";
+                    cancelEdit();
+                }
+            }
+
+            if (addSpotClose) {
+                addSpotClose.onclick = function () {
+                    addSpotModal.style.display = "none";
+                }
+            }
+
+            if (imageModalClose) {
+                imageModalClose.onclick = function () {
+                    imageModal.style.display = "none";
+                }
+            }
+
+            // Close modals when clicking the close button or outside the modal
+            document.querySelectorAll('.modal .close').forEach(closeBtn => {
+                closeBtn.onclick = function () {
+                    closeBtn.parentElement.parentElement.style.display = 'none';
+                };
+            });
+
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+
+            window.onclick = function (event) {
+                if (event.target == addSpotModal) {
+                    addSpotModal.style.display = "none";
+                }
+                if (event.target == spotDetailsModal) {
+                    spotDetailsModal.style.display = "none";
+                    cancelEdit();
+                }
+                if (event.target == imageModal) {
+                    imageModal.style.display = "none";
+                }
+                if (event.target == publicImageModal) {
+                    publicImageModal.style.display = "none";
+                }
+            }
+
+            const spotDetailsForm = document.getElementById('spotDetailsForm');
+            if (spotDetailsForm) {
+                spotDetailsForm.addEventListener('submit', saveSpotDetails);
+            }
+
+            document.getElementById('viewPhotosBtn').onclick = function () {
+                const spotId = document.getElementById('modalSpotId').value;
+                showGallery(auth.currentUser.uid, spotId);
+                const galleryContainer = document.querySelector(`.gallery-container[data-logbook-id="${spotId}"]`);
+                if (galleryContainer) {
+                    toggleGallery(galleryContainer.querySelector('.gallery-folder'));
+                }
+                spotDetailsModal.style.display = "none";
+            };
+
+            document.getElementById('editDetailsBtn').onclick = function () {
+                document.getElementById('spotDetailsDisplay').style.display = 'none';
+                document.getElementById('spotDetailsForm').style.display = 'block';
+                document.querySelector('#spotDetailsForm input[type="submit"]').style.display = 'inline';
+                document.getElementById('editDetailsBtn').style.display = 'none';
+                document.getElementById('cancelEditBtn').style.display = 'inline';
+            }
+
+            document.getElementById('cancelEditBtn').onclick = function () {
+                cancelEdit();
+            }
+
+            document.getElementById('deleteSpotBtn').onclick = function () {
+                const spotId = document.getElementById('modalSpotId').value;
+                deleteSpot(spotId);
+                spotDetailsModal.style.display = "none";
+            }
+
+            document.getElementById('addSpotBtn').onclick = function () {
+                addSpotModal.style.display = "block";
+            };
+
+            // Ensure the signup form is hidden when the login form is visible
+            const loginForm = document.querySelector('.login-form');
+            const signupForm = document.querySelector('.signup-form');
+
+            document.getElementById('signupLink').onclick = function () {
+                loginPage.style.display = 'none';
+                signupPage.style.display = 'flex';
+                signupForm.style.display = 'block';
+            }
+
+            document.getElementById('loginLink').onclick = function () {
+                signupPage.style.display = 'none';
+                loginPage.style.display = 'flex';
+            }
+        });
+
+        // Load user account details
+        function loadAccountDetails() {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        document.getElementById('firstName').value = userData.firstName;
+                        document.getElementById('lastName').value = userData.lastName;
+                        document.getElementById('username').value = userData.username || 'Please Create a Username!';
+                        document.getElementById('email').value = user.email || '';
+                    }
+                });
+            }
+        }
+
+        document.getElementById('accountForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const newUsername = document.getElementById('username').value;
+
+            validateUsername(newUsername).then(isValid => {
+                if (isValid) {
+                    event.preventDefault();
+                    const user = auth.currentUser;
+                    const firstName = document.getElementById('firstName').value;
+                    const lastName = document.getElementById('lastName').value;
+                    const email = document.getElementById('email').value;
+
+                    if (user) {
+                        const promises = [];
+                        if (email !== user.email) {
+                            promises.push(user.updateEmail(email));
+                        }
+
+                        Promise.all(promises).then(() => {
+                            return db.collection('users').doc(user.uid).update({
+                                firstName: firstName,
+                                lastName: lastName,
+                                email: email
+                            });
+                        }).then(() => {
+                        }).catch(error => {
+                            console.error("Error updating account details:", error);
+                            alert("There was an error updating your account, please try again.")
+                        });
+                    }
+                } else {
+                    alert('Username is already taken.');
+                }
+            });
+        });
+
+        function showSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+    </script>
+
+</body>
+
+</html>
