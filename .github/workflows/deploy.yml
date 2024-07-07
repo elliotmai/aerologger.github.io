@@ -47,20 +47,20 @@ jobs:
           EOF
           # Debugging: List contents of public directory
           echo "Contents of public directory after creating config.js:"
-          ls -a public
+          ls public
           
           # Copy index.html to public directory
           cp index.html public/index.html
           
           # Debugging: List contents of public directory again
           echo "Contents of public directory after copying index.html:"
-          ls -a public
+          ls public
           
           # Copy assets if they exist
           if [ -d "./assets" ]; then 
             cp -r ./assets public/assets
             echo "Contents of public directory after copying assets:"
-            ls -a public/assets
+            ls public/assets
           fi
 
       - name: Deploy to GitHub Pages
