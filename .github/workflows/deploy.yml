@@ -24,7 +24,7 @@ jobs:
       - name: Build the project
         run: |
           mkdir -p public
-          cp ./public/index.html public/index.html  # Adjust path if necessary
+          cp index.html public/index.html  # Adjust path if necessary
           if [ -d "./assets" ]; then cp -r ./assets public/assets; fi # Copy assets if they exist
 
       - name: Deploy to GitHub Pages
