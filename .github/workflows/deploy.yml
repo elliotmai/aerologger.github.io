@@ -51,6 +51,9 @@ jobs:
           
           # Copy index.html to public directory
           cp index.html public/index.html
+
+          # Copy AeroLogger_Logo.png to public directory
+          cp AeroLogger_Logo.png public/AeroLogger_Logo.png
           
           # Debugging: List contents of public directory again
           echo "Contents of public directory after copying index.html:"
