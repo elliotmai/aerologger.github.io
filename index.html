@@ -2602,7 +2602,9 @@
 
             const hamburgerMenu = document.getElementById('hamburger-menu');
             const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+            const overlay = document.createElement('div');
+            overlay.id = 'overlay';
+            document.body.appendChild(overlay);
             let sidebarTimeout;
             let isSidebarOpen = false;
             let isClickedOpen = false;
@@ -2616,14 +2618,14 @@
             }
 
             function closeSidebar() {
-                sidebarTimeout = setTimeout(() => {
-                    if (!isClickedOpen) {
+                if (!isClickedOpen) {
+                    sidebarTimeout = setTimeout(() => {
                         sidebar.style.width = '0';
                         document.body.classList.remove('sidebar-open');
                         overlay.style.display = 'none';
                         isSidebarOpen = false;
-                    }
-                }, 500); // Delay to allow user to move the mouse
+                    }, 500); // Delay to allow user to move the mouse
+                }
             }
 
             function immediateCloseSidebar() {
@@ -2646,6 +2648,7 @@
             hamburgerMenu.addEventListener('mouseover', () => {
                 if (!isClickedOpen) openSidebar();
             });
+
             sidebar.addEventListener('mouseover', () => {
                 if (!isClickedOpen) openSidebar();
             });
@@ -2653,12 +2656,15 @@
             hamburgerMenu.addEventListener('mouseout', () => {
                 if (!isClickedOpen) closeSidebar();
             });
+
             sidebar.addEventListener('mouseout', () => {
                 if (!isClickedOpen) closeSidebar();
             });
 
             hamburgerMenu.addEventListener('click', toggleSidebar);
+
             overlay.addEventListener('click', immediateCloseSidebar);
+
             sidebar.addEventListener('click', function (event) {
                 if (event.target.tagName === 'A') {
                     immediateCloseSidebar();
