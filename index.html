@@ -2600,26 +2600,18 @@
                 }
             });
 
-            function toggleSidebar() {
-                const sidebar = document.getElementById("sidebar");
-                if (sidebar.style.width === "250px") {
-                    closeSidebar();
-                } else {
-                    openSidebar();
-                }
-            }
-
             const hamburgerMenu = document.getElementById('hamburger-menu');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
-
             let sidebarTimeout;
+            let isSidebarOpen = false;
 
             function openSidebar() {
                 sidebar.style.width = '250px';
                 document.body.classList.add('sidebar-open');
                 clearTimeout(sidebarTimeout);
                 overlay.style.display = 'block';
+                isSidebarOpen = true;
             }
 
             function closeSidebar() {
@@ -2627,7 +2619,16 @@
                     sidebar.style.width = '0';
                     document.body.classList.remove('sidebar-open');
                     overlay.style.display = 'none';
+                    isSidebarOpen = false;
                 }, 500); // Delay to allow user to move the mouse
+            }
+
+            function toggleSidebar() {
+                if (isSidebarOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
             }
 
             hamburgerMenu.addEventListener('mouseover', openSidebar);
@@ -2635,6 +2636,14 @@
 
             hamburgerMenu.addEventListener('mouseout', closeSidebar);
             sidebar.addEventListener('mouseout', closeSidebar);
+
+            hamburgerMenu.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            sidebar.addEventListener('click', function (event) {
+                if (event.target.tagName === 'A') {
+                    closeSidebar();
+                }
+            });
 
             document.addEventListener('click', function (event) {
                 if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
