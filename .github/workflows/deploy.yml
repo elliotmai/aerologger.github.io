@@ -23,12 +23,12 @@ jobs:
 
       - name: Build the project
         env:
-          APIKEY: ${{ secrets.APIKEY }}
-          AUTHDOMAIN: ${{ secrets.AUTHDOMAIN }}
-          PROJECTID: ${{ secrets.PROJECTID }}
-          STORAGEBUCKET: ${{ secrets.STORAGEBUCKET }}
-          MESSAGINGSENDER_ID: ${{ secrets.MESSAGINGSENDER_ID }}
-          APPID: ${{ secrets.APPID }}
+          API_KEY: ${{ secrets.API_KEY }}
+          AUTH_DOMAIN: ${{ secrets.AUTH_DOMAIN }}
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
+          MESSAGING_SENDER_ID: ${{ secrets.MESSAGING_SENDER_ID }}
+          APP_ID: ${{ secrets.APP_ID }}
         run: |
           echo "Building project..."
           rm -rf public
@@ -36,12 +36,12 @@ jobs:
           # Create a config file with the secrets
           cat <<EOF > public/config.js
           const firebaseConfig = {
-            apiKey: "${{ secrets.APIKEY }}",
-            authDomain: "${{ secrets.AUTHDOMAIN }}",
-            projectId: "${{ secrets.PROJECTID }}",
-            storageBucket: "${{ secrets.STORAGEBUCKET }}",
-            messagingSenderId: "${{ secrets.MESSAGINGSENDERID }}",
-            appId: "${{ secrets.APPID }}"
+            apiKey: "${{ secrets.API_KEY }}",
+            authDomain: "${{ secrets.AUTH_DOMAIN }}",
+            projectId: "${{ secrets.PROJECT_ID }}",
+            storageBucket: "${{ secrets.STORAGE_BUCKET }}",
+            messagingSenderId: "${{ secrets.MESSAGING_SENDER_ID }}",
+            appId: "${{ secrets.APP_ID }}"
           };
           firebase.initializeApp(firebaseConfig);
           EOF
