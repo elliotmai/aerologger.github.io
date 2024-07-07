@@ -23,7 +23,7 @@ jobs:
 
       - name: Build the project
         run: |
-          mkdir public
+          mkdir -p public
           cp index.html public/index.html
           cp -r assets public/assets # Copy your assets if any
 
