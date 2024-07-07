@@ -47,10 +47,7 @@ jobs:
           EOF
           # Copy index.html to public directory
           cp index.html public/index.html
-
-          # Ensure assets directory exists and copy assets
-          mkdir -p public/assets
-          cp -r assets/* public/assets/
+          cp AeroLogger_Logo.png public/AeroLogger_Logo.png
 
           # Create CNAME file for custom domain
           echo "aero-logger.com" > public/CNAME
