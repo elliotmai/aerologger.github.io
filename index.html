@@ -2616,23 +2616,27 @@
             }
 
             function closeSidebar() {
-                if (!isClickedOpen) {
-                    sidebarTimeout = setTimeout(() => {
+                sidebarTimeout = setTimeout(() => {
+                    if (!isClickedOpen) {
                         sidebar.style.width = '0';
                         document.body.classList.remove('sidebar-open');
                         overlay.style.display = 'none';
                         isSidebarOpen = false;
-                    }, 500); // Delay to allow user to move the mouse
-                }
+                    }
+                }, 500); // Delay to allow user to move the mouse
+            }
+
+            function immediateCloseSidebar() {
+                sidebar.style.width = '0';
+                document.body.classList.remove('sidebar-open');
+                overlay.style.display = 'none';
+                isSidebarOpen = false;
+                isClickedOpen = false;
             }
 
             function toggleSidebar() {
                 if (isSidebarOpen && isClickedOpen) {
-                    sidebar.style.width = '0';
-                    document.body.classList.remove('sidebar-open');
-                    overlay.style.display = 'none';
-                    isSidebarOpen = false;
-                    isClickedOpen = false;
+                    immediateCloseSidebar();
                 } else {
                     openSidebar();
                     isClickedOpen = true;
@@ -2646,26 +2650,24 @@
                 if (!isClickedOpen) openSidebar();
             });
 
-            hamburgerMenu.addEventListener('mouseout', closeSidebar);
-            sidebar.addEventListener('mouseout', closeSidebar);
+            hamburgerMenu.addEventListener('mouseout', () => {
+                if (!isClickedOpen) closeSidebar();
+            });
+            sidebar.addEventListener('mouseout', () => {
+                if (!isClickedOpen) closeSidebar();
+            });
 
             hamburgerMenu.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', () => {
-                isClickedOpen = false;
-                closeSidebar();
-            });
-            
+            overlay.addEventListener('click', immediateCloseSidebar);
             sidebar.addEventListener('click', function (event) {
                 if (event.target.tagName === 'A') {
-                    isClickedOpen = false;
-                    closeSidebar();
+                    immediateCloseSidebar();
                 }
             });
 
             document.addEventListener('click', function (event) {
                 if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
-                    isClickedOpen = false;
-                    closeSidebar();
+                    immediateCloseSidebar();
                 }
             });
 
