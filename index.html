@@ -2605,6 +2605,7 @@
             const overlay = document.getElementById('overlay');
             let sidebarTimeout;
             let isSidebarOpen = false;
+            let isClickedOpen = false;
 
             function openSidebar() {
                 sidebar.style.width = '250px';
@@ -2615,38 +2616,55 @@
             }
 
             function closeSidebar() {
-                sidebarTimeout = setTimeout(() => {
+                if (!isClickedOpen) {
+                    sidebarTimeout = setTimeout(() => {
+                        sidebar.style.width = '0';
+                        document.body.classList.remove('sidebar-open');
+                        overlay.style.display = 'none';
+                        isSidebarOpen = false;
+                    }, 500); // Delay to allow user to move the mouse
+                }
+            }
+
+            function toggleSidebar() {
+                if (isSidebarOpen && isClickedOpen) {
                     sidebar.style.width = '0';
                     document.body.classList.remove('sidebar-open');
                     overlay.style.display = 'none';
                     isSidebarOpen = false;
-                }, 500); // Delay to allow user to move the mouse
-            }
-
-            function toggleSidebar() {
-                if (isSidebarOpen) {
-                    closeSidebar();
+                    isClickedOpen = false;
                 } else {
                     openSidebar();
+                    isClickedOpen = true;
                 }
             }
 
-            hamburgerMenu.addEventListener('mouseover', openSidebar);
-            sidebar.addEventListener('mouseover', openSidebar);
+            hamburgerMenu.addEventListener('mouseover', () => {
+                if (!isClickedOpen) openSidebar();
+            });
+            sidebar.addEventListener('mouseover', () => {
+                if (!isClickedOpen) openSidebar();
+            });
 
             hamburgerMenu.addEventListener('mouseout', closeSidebar);
             sidebar.addEventListener('mouseout', closeSidebar);
 
             hamburgerMenu.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', () => {
+                isClickedOpen = false;
+                closeSidebar();
+            });
+            
             sidebar.addEventListener('click', function (event) {
                 if (event.target.tagName === 'A') {
+                    isClickedOpen = false;
                     closeSidebar();
                 }
             });
 
             document.addEventListener('click', function (event) {
                 if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                    isClickedOpen = false;
                     closeSidebar();
                 }
             });
