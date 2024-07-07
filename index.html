@@ -27,16 +27,12 @@
             justify-content: center;
         }
 
-        #hamburger-menu {
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
-            position: absolute;
-            left: 5%;
-            display: none;
+        #hamburger-menu:hover~#sidebar,
+        #sidebar:hover {
+            width: 250px;
         }
 
-        .sidebar {
+        #sidebar {
             height: 100%;
             width: 0;
             position: fixed;
@@ -45,8 +41,12 @@
             left: 0;
             background-color: #122835;
             overflow-x: hidden;
-            transition: 0.5s;
+            transition: width 0.5s;
             padding-top: 60px;
+        }
+
+        body.sidebar-open {
+            margin-left: 250px;
         }
 
         .sidebar a {
@@ -794,35 +794,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                closeSidebar();
-            } else {
-                openSidebar();
-            }
-        }
-
-        function openSidebar() {
-            document.getElementById("sidebar").style.width = "250px";
-            document.body.style.marginLeft = "250px";
-            document.getElementById("overlay").style.display = "block";
-        }
-
-        function closeSidebar() {
-            document.getElementById("sidebar").style.width = "0";
-            document.body.style.marginLeft = "0";
-            document.getElementById("overlay").style.display = "none";
-        }
-
-        document.addEventListener('click', function (event) {
-            const sidebar = document.getElementById("sidebar");
-            const overlay = document.getElementById("overlay");
-            if (event.target !== sidebar && !sidebar.contains(event.target) && event.target !== document.getElementById("hamburger-menu")) {
-                closeSidebar();
-            }
-        });
 
         document.querySelectorAll('#sidebar a').forEach(link => {
             link.addEventListener('click', closeSidebar);
@@ -2650,6 +2621,49 @@
                     document.getElementById("hamburger-menu").style.display = "none";
                 }
             });
+
+            function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar.style.width === "250px") {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        let sidebarTimeout;
+
+        function openSidebar() {
+            sidebar.style.width = '250px';
+            document.body.classList.add('sidebar-open');
+            clearTimeout(sidebarTimeout);
+            overlay.style.display = 'block';
+        }
+
+        function closeSidebar() {
+            sidebarTimeout = setTimeout(() => {
+                sidebar.style.width = '0';
+                document.body.classList.remove('sidebar-open');
+                overlay.style.display = 'none';
+            }, 500); // Delay to allow user to move the mouse
+        }
+
+        hamburgerMenu.addEventListener('mouseover', openSidebar);
+        sidebar.addEventListener('mouseover', openSidebar);
+
+        hamburgerMenu.addEventListener('mouseout', closeSidebar);
+        sidebar.addEventListener('mouseout', closeSidebar);
+
+        document.addEventListener('click', function (event) {
+            if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                closeSidebar();
+            }
+        });
+
 
             if (spotDetailsClose) {
                 spotDetailsClose.onclick = function () {
