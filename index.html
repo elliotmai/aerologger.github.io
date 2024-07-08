@@ -378,6 +378,7 @@
 
         .logbook-header,
         .gallery-header,
+        .public-gallery-header,
         .logbook-order-header,
         .gallery-order-header {
             display: flex;
@@ -389,27 +390,18 @@
             /* Adjust space between header and logbook entries if needed */
         }
 
-        #logbookSearchBar {
+        #logbookSearchBar,
+        #gallerySearchBar,
+        #publicGallerySearchBar {
             width: 20%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
-        #logbookFilterDropdown {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #gallerySearchBar {
-            width: 20%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #galleryFilterDropdown {
+        #logbookFilterDropdown,
+        #galleryFilterDropdown,
+        #publicGalleryFilterDropdown {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -645,30 +637,46 @@
             </div>
         </div>
         <div class="public-gallery hidden">
-            <h2>Public Gallery</h2>
-            <div class="public-gallery-grid" id="publicGalleryGrid">
-                <!-- Public photos will be dynamically added here -->
+            <div class="public-gallery-header">
+                <input type="text" id="publicGallerySearchBar" placeholder="Search..." oninput="filterPublicGallery()">
+                <select id="publicGalleryFilterDropdown" onchange="filterPublicGallery()">
+                    <option value="">All</option>
+                    <option value="aircraftType">By Aircraft Type</option>
+                    <option value="operator">By Operator</option>
+                    <option value="aircraftId">By Aircraft ID</option>
+                    <option value="flightNumber">By Flight Number</option>
+                    <option value="dateSpotted">By Date Spotted</option>
+                    <option value="location">By Location</option>
+                    <option value="origin">By Origin</option>
+                    <option value="destination">By Destination</option>
+                    <option value="username">By Username</option>
+                </select>
             </div>
         </div>
-        <div class="account hidden">
-            <h2>Account</h2>
-            <div class="profile-pic" id="profilePic"></div>
-            <form id="accountForm">
-                <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" name="firstName" required>
-                <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" name="lastName" required>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="email">Email Address:</label>
-                <input type="text" id="email" name="email" required>
-                <input type="submit" value="Update Account">
-            </form>
-            <button class="delete-btn" id="deleteAccountBtn">Delete Account</button>
-            <button class="edit-btn" id="exportLogbookBtn">Export Entries</button>
-            <button class="edit-btn" id="exportGalleriesBtn">Export Galleries</button>
-            <button class="edit-btn" id="exportAllBtn">Export All</button>
+        <h2>Public Gallery</h2>
+        <div class="public-gallery-grid" id="publicGalleryGrid">
+            <!-- Public photos will be dynamically added here -->
         </div>
+    </div>
+    <div class="account hidden">
+        <h2>Account</h2>
+        <div class="profile-pic" id="profilePic"></div>
+        <form id="accountForm">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="email">Email Address:</label>
+            <input type="text" id="email" name="email" required>
+            <input type="submit" value="Update Account">
+        </form>
+        <button class="delete-btn" id="deleteAccountBtn">Delete Account</button>
+        <button class="edit-btn" id="exportLogbookBtn">Export Entries</button>
+        <button class="edit-btn" id="exportGalleriesBtn">Export Galleries</button>
+        <button class="edit-btn" id="exportAllBtn">Export All</button>
+    </div>
     </div>
     <div id="spotDetailsModal" class="modal">
         <div class="modal-content">
@@ -800,6 +808,7 @@
 
     <div class="spinner" id="loadingSpinner"></div>
     <script>
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
@@ -1662,24 +1671,12 @@
             publicGalleryPhotos = []; // Clear the previous list of photos
 
             db.collection('publicGallery').get().then(snapshot => {
-                let index = 0;
                 snapshot.forEach(doc => {
                     const photo = doc.data();
                     if (photo && photo.url) {  // Ensure each photo has a URL
                         photo.id = doc.id; // Store the document ID in the photo object
                         publicGalleryPhotos.push(photo); // Add photo to the list
-
-                        const img = document.createElement('img');
-                        img.src = photo.url;
-                        img.className = 'gallery-photo';
-                        img.onclick = (function (photo, index) {
-                            return function () {
-                                openPublicImageModal(photo.url, photo, index); // Pass the index
-                            };
-                        })(photo, index);
-                        publicGalleryGrid.appendChild(img);
-
-                        index++; // Increment index manually
+                        displayPublicGalleryPhoto(photo); // Display the photo
                     } else {
                         console.error("Photo does not have a URL or is undefined:", doc.id);
                     }
@@ -1687,6 +1684,62 @@
             }).catch(error => {
                 console.error("Error loading public gallery:", error);
             });
+        }
+
+        function displayPublicGalleryPhoto(photo) {
+            const publicGalleryGrid = document.getElementById('publicGalleryGrid');
+            const img = document.createElement('img');
+            img.src = photo.url;
+            img.className = 'gallery-photo';
+            img.onclick = () => openPublicImageModal(photo.url, photo);
+            publicGalleryGrid.appendChild(img);
+        }
+
+        function filterPublicGallery() {
+            const searchValue = document.getElementById('publicGallerySearchBar').value.toLowerCase();
+            const filterValue = document.getElementById('publicGalleryFilterDropdown').value;
+            const publicGalleryGrid = document.getElementById('publicGalleryGrid');
+            publicGalleryGrid.innerHTML = ''; // Clear existing photos
+
+            const filteredPhotos = publicGalleryPhotos.filter(photo => {
+                let textToSearch = '';
+
+                switch (filterValue) {
+                    case 'aircraftType':
+                        textToSearch = photo.details.aircraftType?.toLowerCase() || '';
+                        break;
+                    case 'operator':
+                        textToSearch = photo.details.operator?.toLowerCase() || '';
+                        break;
+                    case 'aircraftId':
+                        textToSearch = photo.details.aircraftId?.toLowerCase() || '';
+                        break;
+                    case 'flightNumber':
+                        textToSearch = photo.details.flightNumber?.toLowerCase() || '';
+                        break;
+                    case 'dateSpotted':
+                        textToSearch = photo.details.dateSpotted?.toLowerCase() || '';
+                        break;
+                    case 'location':
+                        textToSearch = photo.details.location?.toLowerCase() || '';
+                        break;
+                    case 'origin':
+                        textToSearch = photo.details.origin?.toLowerCase() || '';
+                        break;
+                    case 'destination':
+                        textToSearch = photo.details.destination?.toLowerCase() || '';
+                        break;
+                    case 'username':
+                        textToSearch = photo.username?.toLowerCase() || '';
+                        break;
+                    default:
+                        textToSearch = `${photo.details.aircraftType?.toLowerCase() || ''} ${photo.details.operator?.toLowerCase() || ''} ${photo.details.aircraftId?.toLowerCase() || ''} ${photo.details.flightNumber?.toLowerCase() || ''} ${photo.details.dateSpotted?.toLowerCase() || ''} ${photo.details.location?.toLowerCase() || ''} ${photo.details.origin?.toLowerCase() || ''} ${photo.details.destination?.toLowerCase() || ''} ${photo.username?.toLowerCase() || ''}`;
+                }
+
+                return textToSearch.includes(searchValue);
+            });
+
+            filteredPhotos.forEach(photo => displayPublicGalleryPhoto(photo));
         }
 
         function deletePublicImage(docId) {
