@@ -503,8 +503,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <script src="config.js"></script>
-    
+    <!--  <script src="config.js"></script> -->
 </head>
 
 <body>
@@ -653,30 +652,30 @@
                     <option value="username">By Username</option>
                 </select>
             </div>
-        <h2>Public Gallery</h2>
-        <div class="public-gallery-grid" id="publicGalleryGrid">
-            <!-- Public photos will be dynamically added here -->
+            <h2>Public Gallery</h2>
+            <div class="public-gallery-grid" id="publicGalleryGrid">
+                <!-- Public photos will be dynamically added here -->
+            </div>
         </div>
-    </div>
-    <div class="account hidden">
-        <h2>Account</h2>
-        <div class="profile-pic" id="profilePic"></div>
-        <form id="accountForm">
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" required>
-            <label for="lastName">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" required>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <label for="email">Email Address:</label>
-            <input type="text" id="email" name="email" required>
-            <input type="submit" value="Update Account">
-        </form>
-        <button class="delete-btn" id="deleteAccountBtn">Delete Account</button>
-        <button class="edit-btn" id="exportLogbookBtn">Export Entries</button>
-        <button class="edit-btn" id="exportGalleriesBtn">Export Galleries</button>
-        <button class="edit-btn" id="exportAllBtn">Export All</button>
-    </div>
+        <div class="account hidden">
+            <h2>Account</h2>
+            <div class="profile-pic" id="profilePic"></div>
+            <form id="accountForm">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="email">Email Address:</label>
+                <input type="text" id="email" name="email" required>
+                <input type="submit" value="Update Account">
+            </form>
+            <button class="delete-btn" id="deleteAccountBtn">Delete Account</button>
+            <button class="edit-btn" id="exportLogbookBtn">Export Entries</button>
+            <button class="edit-btn" id="exportGalleriesBtn">Export Galleries</button>
+            <button class="edit-btn" id="exportAllBtn">Export All</button>
+        </div>
     </div>
     <div id="spotDetailsModal" class="modal">
         <div class="modal-content">
@@ -808,7 +807,17 @@
 
     <div class="spinner" id="loadingSpinner"></div>
     <script>
-        
+        const firebaseConfig = {
+            apiKey: "AIzaSyApq0Wj12n2Gn8tjD0HJ-MsR3ON8hbh7QQ",
+            authDomain: "aerologger-ec6a6.firebaseapp.com",
+            projectId: "aerologger-ec6a6",
+            storageBucket: "aerologger-ec6a6.appspot.com",
+            messagingSenderId: "1080261936802",
+            appId: "1:1080261936802:web:59543e21bc5c2a4faab9fb",
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
@@ -1008,23 +1017,25 @@
             event.preventDefault();
             const username = document.getElementById('signupUsername').value;
 
-            validateUsername(username).then(isValid => {
+            validateUsersUsername(username).then(isValid => {
                 if (isValid) {
                     event.preventDefault();
 
                     const firstNameElem = document.getElementById('signupFirstName');
                     const lastNameElem = document.getElementById('signupLastName');
+                    const usernameElem = document.getElementById('signupUsername');
                     const emailElem = document.getElementById('signupEmail');
                     const passwordElem = document.getElementById('signupPassword');
 
                     // Check if all elements are available
-                    if (!firstNameElem || !lastNameElem || !emailElem || !passwordElem) {
+                    if (!firstNameElem || !lastNameElem || !emailElem || !passwordElem || !usernameElem) {
                         console.error('One or more form elements are missing');
                         return;
                     }
 
                     const firstName = firstNameElem.value;
                     const lastName = lastNameElem.value;
+                    const username = usernameElem.value;
                     const email = emailElem.value;
                     const password = passwordElem.value;
 
@@ -1043,6 +1054,7 @@
                             db.collection('users').doc(user.uid).set({
                                 firstName: firstName,
                                 lastName: lastName,
+                                username: username,
                                 email: email
                             }).then(() => {
                                 signupPage.style.display = 'none';
@@ -1050,6 +1062,8 @@
                             }).catch(error => {
                                 console.error("Error adding user to Firestore:", error);
                             });
+
+
                         })
                         .catch(error => {
                             console.error("Error signing up: ", error);
@@ -1901,7 +1915,7 @@
         }
 
         // Validate username in sign-up and account update forms
-        function validateUsername(username) {
+        function validateUsersUsername(username) {
             return db.collection('users').where('username', '==', username).get().then(snapshot => {
                 return snapshot.empty; // If empty, username is not taken
             });
@@ -2881,39 +2895,62 @@
 
         document.getElementById('accountForm').addEventListener('submit', function (event) {
             event.preventDefault();
+
+            const user = auth.currentUser;
             const newUsername = document.getElementById('username').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
 
-            validateUsername(newUsername).then(isValid => {
-                if (isValid) {
-                    event.preventDefault();
-                    const user = auth.currentUser;
-                    const firstName = document.getElementById('firstName').value;
-                    const lastName = document.getElementById('lastName').value;
-                    const email = document.getElementById('email').value;
+            if (user) {
+                // Fetch the current user's data from Firestore
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    const currentData = doc.data();
+                    const currentUsername = currentData.username;
 
-                    if (user) {
-                        const promises = [];
-                        if (email !== user.email) {
-                            promises.push(user.updateEmail(email));
-                        }
-
-                        Promise.all(promises).then(() => {
-                            return db.collection('users').doc(user.uid).update({
-                                firstName: firstName,
-                                lastName: lastName,
-                                email: email
-                            });
-                        }).then(() => {
+                    // Check if the new username is different from the current username
+                    if (newUsername !== currentUsername) {
+                        // Validate the new username
+                        validateUsersUsername(newUsername).then(isValid => {
+                            if (isValid) {
+                                updateUserDetails(user, firstName, lastName, newUsername, email);
+                            } else {
+                                alert('Username is already taken.');
+                            }
                         }).catch(error => {
-                            console.error("Error updating account details:", error);
-                            alert("There was an error updating your account, please try again.")
+                            console.error("Error validating username:", error);
+                            alert("There was an error validating the username, please try again.");
                         });
+                    } else {
+                        // Username is the same, proceed with updating details
+                        updateUserDetails(user, firstName, lastName, newUsername, email);
                     }
-                } else {
-                    alert('Username is already taken.');
-                }
-            });
+                }).catch(error => {
+                    console.error("Error fetching user data:", error);
+                    alert("There was an error fetching your current details, please try again.");
+                });
+            }
         });
+
+        function updateUserDetails(user, firstName, lastName, username, email) {
+            const promises = [];
+            if (email !== user.email) {
+                promises.push(user.updateEmail(email));
+            }
+
+            Promise.all(promises).then(() => {
+                return db.collection('users').doc(user.uid).update({
+                    firstName: firstName,
+                    lastName: lastName,
+                    username: username,
+                    email: email
+                });
+            }).then(() => {
+            }).catch(error => {
+                console.error("Error updating account details:", error);
+                alert("There was an error updating your account, please try again.");
+            });
+        }
 
         function showSpinner() {
             document.getElementById('loadingSpinner').style.display = 'block';
