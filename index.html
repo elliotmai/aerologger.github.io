@@ -504,6 +504,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script src="config.js"></script>
+    
 </head>
 
 <body>
@@ -1448,8 +1449,8 @@
             const dateSpotted = logbook.dateSpotted ? `(${logbook.dateSpotted})` : '';
 
             let headerText = aircraftType;
-            if (flightNumber || aircraftId) {
-                headerText += ` - ${flightNumber || aircraftId} `;
+            if (aircraftId || flightNumber) {
+                headerText += ` - ${aircraftId || flightNumber} `;
             }
             headerText += ` ${dateSpotted}`.trim();
 
