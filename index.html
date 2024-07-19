@@ -1448,8 +1448,8 @@
             const dateSpotted = logbook.dateSpotted ? `(${logbook.dateSpotted})` : '';
 
             let headerText = aircraftType;
-            if (flightNumber || aircraftId) {
-                headerText += ` - ${flightNumber || aircraftId} `;
+            if (aircraftId || flightNumber) {
+                headerText += ` - ${aircraftId || flightNumber} `;
             }
             headerText += ` ${dateSpotted}`.trim();
 
