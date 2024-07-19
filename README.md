@@ -21,7 +21,7 @@ AeroLogger is a web application designed for aviation enthusiasts to log and man
 ### Gallery Management
 - **View Galleries**: Users can view all galleries associated with their log entries. Galleries are listed in descending order by the date they were created.
 - **Add Photos to Gallery**: Users can upload new photos to an existing gallery.
-- **View Photos**: Users can view photos within a gallery. Clicking on a photo enlarges it in a modal view, which can be closed by clicking a close button or clicking outside the modal.
+- **View Photos**: Users can view photos within a gallery. Clicking on a photo enlarges it in a modal view, which can be closed by clicking a close button or outside the modal.
 - **Delete Photos**: Users can delete individual photos from a gallery.
 - **Delete Gallery**: Users can delete a gallery and its associated log entry. This action is confirmed with the user before proceeding.
 
