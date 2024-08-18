@@ -1684,13 +1684,17 @@
             publicGalleryGrid.innerHTML = ''; // Clear existing photos
             publicGalleryPhotos = []; // Clear the previous list of photos
 
+            let indexCounter = 0; // Initialize a counter to track index manually
+
             db.collection('publicGallery').get().then(snapshot => {
-                snapshot.forEach(doc => {
+                snapshot.forEach((doc) => {
                     const photo = doc.data();
                     if (photo && photo.url) {  // Ensure each photo has a URL
                         photo.id = doc.id; // Store the document ID in the photo object
                         publicGalleryPhotos.push(photo); // Add photo to the list
-                        displayPublicGalleryPhoto(photo); // Display the photo
+                        console.log("Assigned index:", indexCounter);  // Debugging: check index assignment
+                        displayPublicGalleryPhoto(photo, indexCounter); // Display the photo with its index
+                        indexCounter++; // Increment the counter for the next photo
                     } else {
                         console.error("Photo does not have a URL or is undefined:", doc.id);
                     }
@@ -1700,14 +1704,20 @@
             });
         }
 
-        function displayPublicGalleryPhoto(photo) {
+        function displayPublicGalleryPhoto(photo, index) {
             const publicGalleryGrid = document.getElementById('publicGalleryGrid');
             const img = document.createElement('img');
             img.src = photo.url;
             img.className = 'gallery-photo';
-            img.onclick = () => openPublicImageModal(photo.url, photo);
+            img.onclick = () => {
+                console.log("Clicked photo index:", index);  // Debugging: check index on click
+                openPublicImageModal(photo.url, photo, index); // Pass index to the modal opening function
+            };
             publicGalleryGrid.appendChild(img);
         }
+
+
+
 
         function filterPublicGallery() {
             const searchValue = document.getElementById('publicGallerySearchBar').value.toLowerCase();
@@ -1771,7 +1781,8 @@
         }
 
         function openPublicImageModal(photoUrl, photoData, index) {
-            currentPublicPhotoIndex = index;
+            currentPublicPhotoIndex = index; // Set the current index correctly
+            console.log(currentPublicPhotoIndex);
             const imageModal = document.getElementById('publicImageModal');
             const largeImage = document.getElementById('publicLargeImage');
             largeImage.src = photoUrl;
@@ -1834,6 +1845,7 @@
         function showNextPublicPhoto() {
             if (publicGalleryPhotos.length === 0) return;
             currentPublicPhotoIndex = (currentPublicPhotoIndex + 1) % publicGalleryPhotos.length;
+            console.log("Next photo index:", currentPublicPhotoIndex);  // Debugging: check index on navigation
             const photo = publicGalleryPhotos[currentPublicPhotoIndex];
             if (photo && photo.url) {
                 openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
@@ -1845,6 +1857,7 @@
         function showPreviousPublicPhoto() {
             if (publicGalleryPhotos.length === 0) return;
             currentPublicPhotoIndex = (currentPublicPhotoIndex - 1 + publicGalleryPhotos.length) % publicGalleryPhotos.length;
+            console.log("Previous photo index:", currentPublicPhotoIndex);  // Debugging: check index on navigation
             const photo = publicGalleryPhotos[currentPublicPhotoIndex];
             if (photo && photo.url) {
                 openPublicImageModal(photo.url, photo, currentPublicPhotoIndex);
@@ -1852,6 +1865,7 @@
                 console.error("Photo or photo URL is not defined for index:", currentPublicPhotoIndex);
             }
         }
+
 
         function updatePublicNavigationButtons() {
             const prevButton = document.getElementById('prevPublicPhoto');
@@ -2521,20 +2535,31 @@
 
         document.addEventListener('keydown', function (event) {
             if (document.getElementById('imageModal').style.display === 'block') {
-                if (event.key === 'ArrowRight') {
-                    showNextPhoto();
-                } else if (event.key === 'ArrowLeft') {
+                if (event.key === 'ArrowLeft') {
                     showPreviousPhoto();
+                } else if (event.key === 'ArrowRight') {
+                    showNextPhoto();
+                } else if (event.key === 'Escape') {
+                    closeImageModal();
                 }
-            }
-            if (document.getElementById('publicImageModal').style.display === 'block') {
-                if (event.key === 'ArrowRight') {
-                    showNextPublicPhoto();
-                } else if (event.key === 'ArrowLeft') {
+            } else if (document.getElementById('publicImageModal').style.display === 'block') {
+                if (event.key === 'ArrowLeft') {
                     showPreviousPublicPhoto();
+                } else if (event.key === 'ArrowRight') {
+                    showNextPublicPhoto();
+                } else if (event.key === 'Escape') {
+                    closePublicImageModal();
                 }
             }
         });
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        function closePublicImageModal() {
+            document.getElementById('publicImageModal').style.display = 'none';
+        }
 
         document.getElementById('nextPublicPhoto').onclick = showNextPublicPhoto;
         document.getElementById('prevPublicPhoto').onclick = showPreviousPublicPhoto;
@@ -2914,6 +2939,8 @@
                         validateUsersUsername(newUsername).then(isValid => {
                             if (isValid) {
                                 updateUserDetails(user, firstName, lastName, newUsername, email);
+                                // Call a function to update the username in the public gallery
+                                updatePublicGalleryUsername(user.uid, newUsername);
                             } else {
                                 alert('Username is already taken.');
                             }
@@ -2951,6 +2978,25 @@
                 console.error("Error updating account details:", error);
                 alert("There was an error updating your account, please try again.");
             });
+        }
+
+        async function updatePublicGalleryUsername(userId, newUsername) {
+            // Fetch all photos from the public gallery that belong to the user
+            const publicGallerySnapshot = await db.collection('publicGallery')
+                .where('userId', '==', userId)
+                .get();
+
+            // Update the username for each photo
+            const batch = db.batch();
+            publicGallerySnapshot.forEach(doc => {
+                const photoRef = doc.ref;
+                batch.update(photoRef, { username: newUsername });
+            });
+
+            // Commit the batch update
+            await batch.commit();
+
+            console.log('Username updated in public gallery.');
         }
 
         function showSpinner() {
