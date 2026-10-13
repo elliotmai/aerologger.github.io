@@ -142,8 +142,8 @@ reports/{id}                { photoId, reporterUid, reason, createdAt }
 
 **Still open**
 - **Public search at scale:** my default is indexed queries on username, type, operator, registration; free-text search later only if it grows.
-- **Migration:** keep existing entries (needs a one-off script run with your Firebase admin access) or start clean? With only friends, a clean start is cheapest.
-- **FR24 plan:** which API tier, and is it OK to cap lookups per user?
+- **Migration — decided: migrate.** One-off script moves `users/*/logbooks/*/galleries/*/photos/*` and `publicGallery` into the §3 model, generating thumbnails and dropping lat/lng from public data. Needs your Firebase service-account key run locally (not in this session). Dry-run first, and take a Firestore export + Storage backup beforehand.
+- **FR24 — decided: you have the Explorer plan.** Credit-based, so lookups go through a Cloud Function that caches per flight/reg and caps per user. Still to verify against FR24's docs: which endpoints Explorer includes (flight lookup by number vs. by registration) and the monthly credit allowance.
 
 ---
 
