@@ -140,6 +140,9 @@ reports/{id}                { photoId, reporterUid, reason, createdAt }
 4. **Chatbot** parked (P3). **FR24** promoted to P1; **aircraft facts** stay P2.
 5. **Privacy:** published photos show **place name only**; coordinates never leave the owner's account. Enforced by not copying lat/lng into anything public.
 
+6. **UI direction: A · Hangar** (eggshell ground, dark navy widgets, orange/teal accents).
+7. **No generated imagery.** An entry shows a real photo from that spot, or no photo. Entries without photos get a typographic tile (registration + "No photo"), are omitted from Gallery and Public Gallery, and photos are optional when adding a spot.
+
 **Still open**
 - **Public search at scale:** my default is indexed queries on username, type, operator, registration; free-text search later only if it grows.
 - **Migration — decided: migrate.** One-off script moves `users/*/logbooks/*/galleries/*/photos/*` and `publicGallery` into the §3 model, generating thumbnails and dropping lat/lng from public data. Needs your Firebase service-account key run locally (not in this session). Dry-run first, and take a Firestore export + Storage backup beforehand.
