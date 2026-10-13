@@ -143,7 +143,7 @@ reports/{id}                { photoId, reporterUid, reason, createdAt }
 **Still open**
 - **Public search at scale:** my default is indexed queries on username, type, operator, registration; free-text search later only if it grows.
 - **Migration — decided: migrate.** One-off script moves `users/*/logbooks/*/galleries/*/photos/*` and `publicGallery` into the §3 model, generating thumbnails and dropping lat/lng from public data. Needs your Firebase service-account key run locally (not in this session). Dry-run first, and take a Firestore export + Storage backup beforehand.
-- **FR24 — decided: you have the Explorer plan.** Credit-based, so lookups go through a Cloud Function that caches per flight/reg and caps per user. Still to verify against FR24's docs: which endpoints Explorer includes (flight lookup by number vs. by registration) and the monthly credit allowance.
+- **FR24 — decided: you have the Explorer plan.** Credit-based, so lookups go through a Cloud Function that caches per flight/reg and caps per user. Budget (from FR24 docs via search; their pages are JS-rendered so I couldn't read the tables directly — confirm in your dashboard): Explorer = $9/mo, **30,000 credits** (possibly doubled by a promo through 2026-12-31), **10 queries/min**, 30 days historic. Flight summary costs per returned flight: full 2 credits live / 3 (≤30 days) / 6 (older); light 1 / 2 / 3. Summary queries are capped to a 14-day window and can filter by registration. Design consequence: use the **light** variant, cache every lookup in Firestore, lookup only on user tap ("Autofill"), cap ~20/user/day. At light/historic ≈2 credits, 30k credits ≈ 15,000 lookups/month.
 
 ---
 
