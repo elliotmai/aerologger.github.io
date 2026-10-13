@@ -91,9 +91,9 @@ Pick location from a map (or GPS), save a name + coordinates, show a **map page*
 | Feature | Pri | Notes / honest take |
 |---|---|---|
 | Aircraft facts / news by reg or type | P2 | Needs a backend and an API; "scrape the internet" is fragile. Cheaper: a type-facts lookup from a static dataset |
-| FlightRadar24 API | P2 | Paid API. Value: autofill operator/route from a flight number. Decide whether worth the cost |
-| Chatbot answering aircraft questions | P2 | Needs a **server-side proxy** (a Firebase Cloud Function) so the key isn't public, plus rate limiting and a cost cap |
-| Request form | P1 | See open question 4 |
+| FlightRadar24 API | **P1** | **Raised by you.** Autofill operator/route/type from a flight number or reg. Paid API, so call it through a Cloud Function (key stays private, results cached per flight). Needs a plan check on FR24 pricing/limits before we commit |
+| Chatbot answering aircraft questions | **P3 (parked)** | Needs a **server-side proxy** (a Firebase Cloud Function) so the key isn't public, plus rate limiting and a cost cap |
+| Request form | P0 (cheap) | **Decided:** reuse Ticketbooth from `app-template` (`FEEDBACK_URL` footer link to the shared page). Nothing to build beyond the footer; add to rebuild |
 
 ### 2.9 Platform & polish (your list)
 - **Navigation:** hamburger vs bottom tab bar → decide in UI phase (my pick: bottom tabs on phone, side rail on desktop).
@@ -131,15 +131,19 @@ reports/{id}                { photoId, reporterUid, reason, createdAt }
 
 ---
 
-## 4. Decisions I need from you
+## 4. Decisions
 
-1. **Single gallery per entry, or can an entry have several?** Recommend: one (simpler; Collections cover grouping).
-2. **Search at scale:** client-side search is fine for a personal logbook (hundreds of entries). The *public* gallery will outgrow it. Recommend: public search = username + aircraft type + operator + registration via indexed queries; free-text later (Algolia/Typesense) only if it gets big.
-3. **Is this app for you and friends, or the open public?** Drives moderation, reporting, and whether email verification is enough.
-4. **What is the "Request form"?** Feature requests to you? Requests for aircraft info? Request to remove a photo?
-5. **Chatbot / FR24 / facts:** in scope for v2, or parked? (They need paid APIs and a backend.)
-6. **Privacy:** default location precision for published photos? Exact GPS on a public photo can reveal where someone lives. Recommend: published photos show place *name* only, never coordinates.
-7. **Migration:** do existing users' entries matter, or is a clean reset acceptable?
+**Settled**
+1. **One gallery per entry.** Collections handle grouping. (The multi-gallery model goes away.)
+2. **Audience:** you and friends now, built so it can grow. So: reporting + owner-only rules enforced server-side from day one; no heavy moderation tooling yet.
+3. **Request form = feedback/changes**, via the shared **Ticketbooth** from `app-template`.
+4. **Chatbot** parked (P3). **FR24** promoted to P1; **aircraft facts** stay P2.
+5. **Privacy:** published photos show **place name only**; coordinates never leave the owner's account. Enforced by not copying lat/lng into anything public.
+
+**Still open**
+- **Public search at scale:** my default is indexed queries on username, type, operator, registration; free-text search later only if it grows.
+- **Migration:** keep existing entries (needs a one-off script run with your Firebase admin access) or start clean? With only friends, a clean start is cheapest.
+- **FR24 plan:** which API tier, and is it OK to cap lookups per user?
 
 ---
 
@@ -161,7 +165,7 @@ reports/{id}                { photoId, reporterUid, reason, createdAt }
 
 1. **Functionality (this doc):** you answer §4, we lock scope and priorities.
 2. **UI exploration:** I build 3 clickable HTML previews (logbook, entry detail, gallery, public gallery, map) in different directions, including your eggshell-background / darker-widgets idea. You pick one.
-3. **Rebuild on the chosen UI** with the new data model, split into files with a build step (Vite).
+3. **Rebuild on `app-template`** (Vite + React + Tailwind, PWA with auto-update, toasts, theme toggle, pull-to-refresh, What's New popup, Ticketbooth footer, optional Firebase module) with the chosen UI and new data model. This covers the PWA, toast/alert, tab-title and "remove stray headers" items for free. Note the template's CLAUDE.md and CI require a What's New entry per release.
 4. **Performance:** thumbnails, paging, modular Firebase SDK, caching/PWA. Measured before/after with Lighthouse.
 5. **Extras:** map, collections, stats, then chatbot/FR24 if you still want them.
 
