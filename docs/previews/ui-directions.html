@@ -1,0 +1,316 @@
+<title>AeroLogger UI Previews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Concept: a preview bench. A switcher on top swaps three complete UI directions (same data, different identity). */
+:root{
+  --bench:#e9e6df; --bench-fg:#1c2430; --bench-line:#cfcac0; --bench-card:#f7f5f0; --bench-accent:#0984A2;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bench:#10161c;--bench-fg:#e6ebef;--bench-line:#2a3540;--bench-card:#18212a;--bench-accent:#55b6cf;color-scheme:dark}}
+:root[data-theme="dark"]{--bench:#10161c;--bench-fg:#e6ebef;--bench-line:#2a3540;--bench-card:#18212a;--bench-accent:#55b6cf;color-scheme:dark}
+html,body{height:auto}
+body{background:var(--bench);color:var(--bench-fg);font:14px/1.45 "DM Sans",system-ui,sans-serif;padding-inline:16px;padding-block:16px 40px}
+*{box-sizing:border-box}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.bench-head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.bench-head h1{font:600 18px "DM Sans";margin:0;letter-spacing:-.01em}
+.seg{display:flex;gap:4px;padding:4px;border:1px solid var(--bench-line);border-radius:10px;background:var(--bench-card);flex-wrap:wrap}
+.seg button{border:0;background:none;color:inherit;font:500 13px "DM Sans";padding:7px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--bench-fg);color:var(--bench)}
+.seg button:focus-visible,.app button:focus-visible,.app input:focus-visible,.app select:focus-visible,.app textarea:focus-visible{outline:2px solid var(--bench-accent);outline-offset:2px}
+.blurb{margin:0;max-width:70ch;color:color-mix(in srgb,var(--bench-fg) 72%,transparent)}
+.blurb b{color:var(--bench-fg)}
+.frame{border:1px solid var(--bench-line);border-radius:14px;overflow:hidden;position:relative}
+
+/* ================= APP (shared structure) ================= */
+.app{--bg:#fff;--ink:#111;--mute:#666;--card:#fff;--line:#ddd;--acc:#E7995D;--acc2:#0984A2;--onacc:#122835;--r:12px;
+  background:var(--bg);color:var(--ink);min-height:720px;display:flex;flex-direction:column;position:relative;font-family:var(--body)}
+.app *{min-width:0}
+.app button{font:inherit;color:inherit;cursor:pointer}
+.app input,.app select,.app textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:calc(var(--r) - 4px);padding:10px 12px;width:100%}
+.app textarea{min-height:70px;resize:vertical}
+.app label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mute)}
+.top{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.brand{display:flex;align-items:center;gap:9px;font:var(--h);font-size:20px;letter-spacing:-.01em}
+.brand i{width:26px;height:26px;border-radius:7px;background:var(--acc);display:grid;place-items:center}
+.brand svg{width:16px;height:16px}
+.nav{display:flex;gap:2px}
+.nav button{border:0;background:none;padding:9px 12px;border-radius:9px;font-weight:600;font-size:13px;color:var(--mute)}
+.nav button[aria-current="page"]{color:var(--ink)}
+.me{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mute)}
+.av{width:30px;height:30px;border-radius:50%;background:var(--acc2);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.main{flex:1;padding:6px 16px 90px;display:flex;flex-direction:column;gap:14px}
+.pagehead{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px}
+.pagehead h2{font:var(--h);font-size:28px;margin:0;letter-spacing:-.02em}
+.pagehead p{margin:2px 0 0;color:var(--mute);font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools input{flex:1 1 200px}.tools select{flex:0 1 170px;width:auto}
+.btn{border:0;background:var(--acc);color:var(--onacc);font-weight:600;padding:10px 16px;border-radius:calc(var(--r) - 2px)}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.danger{background:none;border:1px solid var(--line);color:#c0392b}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:none;border-radius:99px;padding:5px 11px;font-size:12px;color:var(--mute)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ph{display:block;width:100%;height:100%;object-fit:cover}
+.ph svg{display:block;width:100%;height:100%}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--acc2) 16%,transparent);color:var(--acc2)}
+.tag.new{background:color-mix(in srgb,var(--acc) 26%,transparent);color:var(--ink)}
+.empty{padding:40px 10px;text-align:center;color:var(--mute)}
+.tabbar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-around;padding:8px 8px 10px;background:var(--bar);border-top:1px solid var(--line);z-index:5}
+.tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--mute);padding:4px 10px}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-current="page"]{color:var(--acc)}
+.fab{position:absolute;right:16px;bottom:78px;z-index:6;border-radius:99px;padding:13px 18px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13px;z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:rgba(8,14,20,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);color:var(--ink);width:100%;max-width:760px;max-height:94%;overflow:auto;border-radius:var(--r) var(--r) 0 0;display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:760px){.scrim{align-items:center}.sheet{border-radius:var(--r);grid-template-columns:1.1fr 1fr;max-height:88%}}
+.sheet .pic{aspect-ratio:4/3;background:#000;position:relative}
+.sheet .pic .navb{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:18px}
+.sheet .body{padding:18px;display:flex;flex-direction:column;gap:12px}
+.sheet h3{font:var(--h);font-size:24px;margin:0;letter-spacing:-.01em}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:13px}
+.kv dt{color:var(--mute)}.kv dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.x{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:18px}
+
+/* form */
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:760px}
+.form .full{grid-column:1/-1}
+@media(max-width:560px){.form{grid-template-columns:1fr}}
+.inl{display:flex;gap:8px;align-items:end}.inl label{flex:1}
+.fr24{font-size:12px;color:var(--mute);display:flex;gap:6px;align-items:center;margin-top:2px}
+.fr24 b{color:var(--acc2)}
+.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--mute);font-size:13px}
+.prog{height:5px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;width:62%;background:var(--acc2)}
+
+/* ============ DIRECTION A — Hangar: eggshell ground, dark widgets ============ */
+.app[data-dir="a"]{--bg:#EFE9DA;--ink:#122835;--mute:#5d6b73;--card:#122835;--line:#d8d0bd;--acc:#E7995D;--acc2:#0984A2;--onacc:#122835;--r:16px;--bar:#122835;
+  --h:700 1em "Bricolage Grotesque",sans-serif;--body:"DM Sans",sans-serif}
+.app[data-dir="a"] .top .nav{display:none}
+.app[data-dir="a"] .brand{color:var(--ink)}
+.app[data-dir="a"] .tabbar button{color:#8da0aa}
+.app[data-dir="a"] .tabbar button[aria-current="page"]{color:#E7995D}
+.app[data-dir="a"] .tools input,.app[data-dir="a"] .tools select{background:#f8f4ea;border-color:var(--line)}
+.app[data-dir="a"] .chip[aria-pressed="true"]{background:#122835;color:#EFE9DA}
+.a-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.a-card{background:#122835;color:#EFE9DA;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:104px 1fr;text-align:left;border:0;padding:0}
+.a-card .ph{height:100%;min-height:112px}
+.a-card .t{padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.a-card .reg{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.06em;color:#E7995D}
+.a-card h3{margin:0;font:700 17px "Bricolage Grotesque";letter-spacing:-.01em}
+.a-card .m{font-size:12px;color:#9fb2bb}
+.a-card .route{margin-top:auto;font:500 12px "IBM Plex Mono",monospace;color:#58b6c9;display:flex;gap:6px;align-items:center}
+.app[data-dir="a"] .sheet,.app[data-dir="a"] .app-card{background:#122835;color:#EFE9DA;--ink:#EFE9DA;--mute:#9fb2bb;--line:#2b4352;--bg:#122835}
+.app[data-dir="a"] .sheet input,.app[data-dir="a"] .sheet textarea{background:#0d1f2a;color:#EFE9DA}
+.app[data-dir="a"] .form-wrap{background:#122835;color:#EFE9DA;--ink:#EFE9DA;--mute:#9fb2bb;--line:#2b4352;padding:18px;border-radius:16px}
+.app[data-dir="a"] .form-wrap input,.app[data-dir="a"] .form-wrap textarea,.app[data-dir="a"] .form-wrap select{background:#0d1f2a;color:#EFE9DA}
+.app[data-dir="a"] .form-wrap .btn.ghost{color:#EFE9DA}
+
+/* ============ DIRECTION B — Logbook: an actual book ============ */
+.app[data-dir="b"]{--bg:#16242c;--ink:#2a2418;--mute:#7a6f58;--card:#f5efe0;--line:#d9cfb6;--acc:#0984A2;--acc2:#589F9F;--onacc:#fff;--r:6px;--bar:#122835;
+  --h:600 1em "Newsreader",serif;--body:"Newsreader",serif;font-size:15px}
+.app[data-dir="b"] .top{color:#e9dfc6}
+.app[data-dir="b"] .brand{color:#e9dfc6}.app[data-dir="b"] .brand i{background:#E7995D}
+.app[data-dir="b"] .nav button{color:#9fb2bb;font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:6px 6px 0 0}
+.app[data-dir="b"] .nav button[aria-current="page"]{background:#f5efe0;color:#2a2418}
+.app[data-dir="b"] .me{color:#9fb2bb}
+.app[data-dir="b"] .tabbar{display:none}
+.app[data-dir="b"] .main{background:#f5efe0;margin:0 12px 12px;border-radius:4px 10px 10px 4px;padding:22px 22px 80px;position:relative;background-image:linear-gradient(90deg,rgba(0,0,0,.14),rgba(0,0,0,0) 14px),repeating-linear-gradient(#f5efe0 0 31px,#e6dcc2 31px 32px);color:var(--ink)}
+.app[data-dir="b"] .pagehead h2{font-style:italic;font-weight:400;font-size:32px}
+.app[data-dir="b"] .tools input,.app[data-dir="b"] .tools select{background:#fffaf0}
+.app[data-dir="b"] .btn{font-family:"IBM Plex Mono";font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.app[data-dir="b"] .fab{display:none}
+.ledger{width:100%;border-collapse:collapse;font-size:14px}
+.ledger th{font:500 10.5px "IBM Plex Mono";letter-spacing:.08em;text-transform:uppercase;text-align:left;color:var(--mute);padding:6px 8px;border-bottom:2px solid #2a2418}
+.ledger td{padding:9px 8px;border-bottom:1px solid #d9cfb6;vertical-align:middle}
+.ledger tr.r{cursor:pointer}.ledger tr.r:hover td{background:rgba(9,132,162,.08)}
+.ledger .mono{font:500 12px "IBM Plex Mono"}
+.ledger .th{width:54px;height:40px;border-radius:2px;overflow:hidden;border:1px solid #cfc3a3;display:block}
+.ledger-wrap{overflow-x:auto}
+@media(max-width:640px){.ledger .hide-s{display:none}}
+.stamp{display:inline-block;border:1.5px solid #0984A2;color:#0984A2;border-radius:3px;padding:0 6px;font:500 10px "IBM Plex Mono";letter-spacing:.08em;text-transform:uppercase;transform:rotate(-3deg)}
+.app[data-dir="b"] .sheet{background:#f5efe0;--ink:#2a2418}
+.app[data-dir="b"] .sheet h3{font-style:italic;font-weight:400;font-size:28px}
+.app[data-dir="b"] .sheet .kv dt{font:500 10.5px "IBM Plex Mono";text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.app[data-dir="b"] .chip{font-family:"IBM Plex Mono";font-size:11px}
+.app[data-dir="b"] .chip[aria-pressed="true"]{background:#0984A2;border-color:#0984A2;color:#fff}
+.app[data-dir="b"] .toast{background:#2a2418;color:#f5efe0}
+
+/* ============ DIRECTION C — Ramp: dark, photo-first, signage type ============ */
+.app[data-dir="c"]{--bg:#0b1218;--ink:#e8eef2;--mute:#8a9ba6;--card:#121c24;--line:#22303b;--acc:#E7995D;--acc2:#2aa5c4;--onacc:#0b1218;--r:4px;--bar:#0b1218;
+  --h:600 1em "Barlow Condensed",sans-serif;--body:"Barlow",sans-serif}
+.app[data-dir="c"] .brand{text-transform:uppercase;letter-spacing:.08em;font-size:19px}
+.app[data-dir="c"] .brand i{background:none;border:1.5px solid var(--acc)}
+.app[data-dir="c"] .pagehead h2{text-transform:uppercase;letter-spacing:.03em;font-size:34px}
+.app[data-dir="c"] .nav button{font-family:"Barlow Condensed";text-transform:uppercase;letter-spacing:.1em;font-size:14px;border-bottom:2px solid transparent;border-radius:0}
+.app[data-dir="c"] .nav button[aria-current="page"]{border-bottom-color:var(--acc)}
+.app[data-dir="c"] .tabbar{display:none}
+.app[data-dir="c"] .fab{bottom:20px;border-radius:4px}
+.app[data-dir="c"] .btn{text-transform:uppercase;letter-spacing:.08em;font-family:"Barlow Condensed";font-size:15px}
+.c-grid{columns:3 220px;column-gap:6px}
+.c-tile{position:relative;display:block;width:100%;margin:0 0 6px;padding:0;border:0;background:#000;break-inside:avoid;overflow:hidden}
+.c-tile .ph{height:auto;aspect-ratio:var(--ar,4/3)}
+.c-tile .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.82));color:#fff;text-align:left;display:flex;justify-content:space-between;align-items:end;gap:8px}
+.c-tile .cap b{font:600 17px "Barlow Condensed";letter-spacing:.03em;text-transform:uppercase}
+.c-tile .cap span{font:500 11px "IBM Plex Mono";color:#E7995D}
+.c-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.c-strip div{background:var(--card);padding:10px 12px}.c-strip b{display:block;font:600 26px "Barlow Condensed";color:var(--acc)}.c-strip span{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+@media(min-width:820px){
+  .app[data-dir="c"]{flex-direction:row}
+  .app[data-dir="c"] .top{flex-direction:column;align-items:stretch;width:190px;border-right:1px solid var(--line);padding:18px 12px;gap:18px}
+  .app[data-dir="c"] .nav{flex-direction:column}
+  .app[data-dir="c"] .nav button{text-align:left}
+  .app[data-dir="c"] .nav button[aria-current="page"]{border-bottom-color:transparent;border-left:2px solid var(--acc);background:var(--card)}
+  .app[data-dir="c"] .me{margin:auto 0 0}
+  .app[data-dir="c"] .shell{flex:1;display:flex;flex-direction:column}
+}
+.app[data-dir="c"] .shell{flex:1;display:flex;flex-direction:column;position:relative}
+.app:not([data-dir="c"]) .shell{display:contents}
+.app[data-dir="c"] .tabbar,.app[data-dir="c"] .nav{position:static}
+@media(max-width:819px){.app[data-dir="c"] .nav{display:none}.app[data-dir="c"] .tabbar{display:flex}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="bench-head">
+    <h1>AeroLogger · three UI directions</h1>
+    <div class="seg" role="group" aria-label="Direction" id="dirSeg">
+      <button data-dir="a" aria-pressed="true">A · Hangar</button>
+      <button data-dir="b" aria-pressed="false">B · Pilot's logbook</button>
+      <button data-dir="c" aria-pressed="false">C · Ramp</button>
+    </div>
+  </div>
+  <p class="blurb" id="blurb"></p>
+  <div class="frame"><div class="app" id="app" data-dir="a"></div></div>
+  <p class="blurb">Everything is clickable with sample data: open an entry, flip photos, publish, tap a username, search, sort, and use <b>Autofill from FR24</b> on the Add spot screen. Resize the window to see the phone layout.</p>
+</div>
+
+<script>
+const BLURBS={
+ a:'<b>Hangar.</b> Your eggshell-background idea: warm light ground, dark navy widgets, orange and teal only as accents. Bottom tab bar on phone, big photo-led cards. The safest and most app-like.',
+ b:'<b>Pilot\'s logbook.</b> The "make it look like a book" idea: the logbook is a ruled ledger page with columns, stamped Public badges, mono data, serif headings. Distinctive, and fastest to scan on desktop.',
+ c:'<b>Ramp.</b> Photo-first and dark, with airport-signage type. A masonry wall of photos is the home screen; side rail on desktop, tab bar on phone. Best if photos are the point.'
+};
+const E=[
+ {id:1,type:'Boeing 747-8F',op:'Cargolux',reg:'LX-VCM',flt:'CV8421',date:'2026-10-04',loc:'Anchorage (ANC)',from:'ANC',to:'LUX',notes:'Heavy departure on 07R. Gear up right at the cone of the fence.',h:210,pub:1,user:'elliot',n:3,ar:'4/3'},
+ {id:2,type:'Airbus A350-1000',op:'Qatar Airways',reg:'A7-ANA',flt:'QR739',date:'2026-09-27',loc:'Seattle (SEA)',from:'DOH',to:'SEA',notes:'First time seeing the -1000 in person.',h:28,pub:0,n:2,ar:'3/4',lifer:1},
+ {id:3,type:'Boeing 737-9',op:'Alaska Airlines',reg:'N915AK',flt:'AS318',date:'2026-09-14',loc:'Seattle (SEA)',from:'SEA',to:'LAX',notes:'Special livery, sunset light.',h:18,pub:1,user:'elliot',n:4,ar:'4/3'},
+ {id:4,type:'Embraer E175',op:'Horizon Air',reg:'N640QX',flt:'QX2290',date:'2026-08-30',loc:'Portland (PDX)',from:'PDX',to:'SEA',notes:'',h:160,pub:0,n:1,ar:'1/1'},
+ {id:5,type:'Boeing 787-9',op:'Air New Zealand',reg:'ZK-NZE',flt:'NZ6',date:'2026-08-12',loc:'Los Angeles (LAX)',from:'LAX',to:'AKL',notes:'Black tail, evening bank.',h:195,pub:1,user:'maya_spots',n:2,ar:'4/3'},
+ {id:6,type:'Airbus A220-300',op:'Delta Air Lines',reg:'N301DU',flt:'DL1184',date:'2026-07-22',loc:'Salt Lake City (SLC)',from:'SLC',to:'SEA',notes:'Quiet engines, smooth taxi.',h:240,pub:1,user:'jt_avgeek',n:3,ar:'3/4'},
+ {id:7,type:'Boeing 777-300ER',op:'Emirates',reg:'A6-ECQ',flt:'EK229',date:'2026-07-02',loc:'Seattle (SEA)',from:'DXB',to:'SEA',notes:'',h:12,pub:0,n:2,ar:'4/3'},
+ {id:8,type:'Antonov An-124',op:'Volga-Dnepr',reg:'RA-82078',flt:'VI4111',date:'2026-05-19',loc:'Anchorage (ANC)',from:'ANC',to:'FRA',notes:'Rare visitor, big crowd at the fence.',h:48,pub:1,user:'maya_spots',n:5,ar:'4/3'}
+];
+const ICON={log:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M9 8h6M9 12h6"/></svg>',gal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>',pub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 15-5 16 0"/></svg>',plus:'+'};
+const LOGO='<svg viewBox="0 0 24 24" fill="#122835"><path d="M2 14l9-2 4-8h3l-2 8 5 1v2l-6-.5-1 5h-2l-1-5-9-1z"/></svg>';
+let uid=0;
+function photo(e,i=0){
+  const id='g'+(uid++),h=e.h,x=(i*37)%40,r=((i*7)%9)-4;
+  return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${e.type} photo placeholder"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h} 55% ${28+i*3}%)"/><stop offset=".62" stop-color="hsl(${(h+25)%360} 60% ${58+i*2}%)"/><stop offset="1" stop-color="hsl(${(h+40)%360} 35% 22%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#${id})"/><rect y="236" width="400" height="64" fill="rgba(10,18,24,.55)"/><g transform="translate(${x-20} ${r*2}) rotate(${r} 200 150)" fill="rgba(255,255,255,.92)"><path d="M40 150 Q60 138 120 138 L300 138 Q350 140 368 150 Q350 160 300 160 L120 160 Q60 162 40 150Z"/><path d="M62 142 L42 96 L80 96 L102 140Z" fill="rgba(231,153,93,.95)"/><path d="M170 156 L232 204 L256 204 L224 156Z" fill="rgba(215,224,230,.95)"/><path d="M170 140 L226 98 L246 98 L222 140Z" fill="rgba(215,224,230,.95)"/><ellipse cx="206" cy="170" rx="14" ry="7" fill="rgba(60,75,86,.9)"/></g></svg>`;
+}
+const S={dir:'a',view:'log',q:'',sort:'new',filt:'all',profile:null,sheet:null,toast:'',fr:0,published:new Set(E.filter(e=>e.pub).map(e=>e.id))};
+const $=s=>document.querySelector(s);
+const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+function match(e){const q=S.q.toLowerCase();return !q||[e.type,e.op,e.reg,e.flt,e.loc,e.from,e.to,e.notes,e.user||''].join(' ').toLowerCase().includes(q)}
+function sorted(list){const l=[...list];if(S.sort==='type')l.sort((a,b)=>a.type.localeCompare(b.type));else if(S.sort==='op')l.sort((a,b)=>a.op.localeCompare(b.op));else if(S.sort==='date')l.sort((a,b)=>b.date.localeCompare(a.date));else l.sort((a,b)=>b.id-a.id);return l}
+function myList(){let l=E.filter(match);if(S.filt==='pub')l=l.filter(e=>S.published.has(e.id));if(S.filt==='lifer')l=l.filter(e=>e.lifer);return sorted(l)}
+function pubList(){let l=E.filter(e=>S.published.has(e.id)&&match(e));if(S.profile)l=l.filter(e=>(e.user||'elliot')===S.profile);return sorted(l)}
+function toast(t){S.toast=t;render();clearTimeout(toast.t);toast.t=setTimeout(()=>{S.toast='';render()},1800)}
+
+function tools(withFilter){
+  return `<div class="tools"><input id="q" type="search" placeholder="Search type, operator, reg, notes…" value="${S.q.replace(/"/g,'&quot;')}" aria-label="Search"><select id="sort" aria-label="Sort"><option value="new"${S.sort==='new'?' selected':''}>Newest added</option><option value="date"${S.sort==='date'?' selected':''}>Date spotted</option><option value="type"${S.sort==='type'?' selected':''}>Aircraft type</option><option value="op"${S.sort==='op'?' selected':''}>Operator</option></select></div>`+(withFilter?`<div class="chips">${[['all','All'],['pub','Published'],['lifer','Lifers']].map(([k,l])=>`<button class="chip" data-f="${k}" aria-pressed="${S.filt===k}">${l}</button>`).join('')}</div>`:'');
+}
+function viewLog(){
+  const l=myList();let body;
+  if(!l.length)body='<div class="empty">No spots match. Clear the search or add a new spot.</div>';
+  else if(S.dir==='a')body=`<div class="a-list">${l.map(e=>`<button class="a-card" data-open="${e.id}"><div>${`<span class="ph">${photo(e,e.id)}</span>`}</div><div class="t"><span class="reg">${e.reg}${e.lifer?' · LIFER':''}</span><h3>${e.type}</h3><span class="m">${e.op} · ${fmt(e.date)}</span><span class="route">${e.from} → ${e.to}${S.published.has(e.id)?' <span class="tag" style="margin-left:auto">Public</span>':''}</span></div></button>`).join('')}</div>`;
+  else if(S.dir==='b')body=`<div class="ledger-wrap"><table class="ledger"><thead><tr><th></th><th>Date</th><th>Aircraft</th><th class="hide-s">Operator</th><th>Reg</th><th class="hide-s">Flight</th><th class="hide-s">Route</th><th></th></tr></thead><tbody>${l.map(e=>`<tr class="r" data-open="${e.id}" tabindex="0"><td><span class="th">${photo(e,e.id)}</span></td><td class="mono">${e.date.slice(5)}<br><span style="color:var(--mute)">${e.date.slice(0,4)}</span></td><td><b>${e.type}</b>${e.lifer?' <span class="stamp">Lifer</span>':''}</td><td class="hide-s">${e.op}</td><td class="mono">${e.reg}</td><td class="mono hide-s">${e.flt}</td><td class="mono hide-s">${e.from}→${e.to}</td><td>${S.published.has(e.id)?'<span class="stamp">Public</span>':''}</td></tr>`).join('')}</tbody></table></div>`;
+  else body=`<div class="c-grid">${l.map(e=>tile(e,`data-open="${e.id}"`,e.reg,e.type)).join('')}</div>`;
+  const stats=S.dir==='c'?`<div class="c-strip"><div><b>${E.length}</b><span>Spots</span></div><div><b>${E.reduce((a,e)=>a+e.n,0)}</b><span>Photos</span></div><div><b>${new Set(E.map(e=>e.type)).size}</b><span>Types</span></div><div><b>${E.filter(e=>e.lifer).length}</b><span>Lifers 30d</span></div></div>`:'';
+  return head('Logbook',`${E.length} spots · ${E.reduce((a,e)=>a+e.n,0)} photos`,`<button class="btn" data-go="add">Add spot</button>`)+stats+tools(true)+body;
+}
+function tile(e,attr,l,r){return `<button class="c-tile" ${attr} style="--ar:${e.ar}"><span class="ph">${photo(e,e.id)}</span><span class="cap"><b>${r}</b><span>${l}</span></span></button>`}
+function head(t,sub,act){return `<div class="pagehead"><div><h2>${t}</h2><p>${sub}</p></div>${act||''}</div>`}
+function viewGal(){
+  const l=sorted(E.filter(match));
+  const card=e=>S.dir==='a'?`<button class="a-card" data-open="${e.id}" style="grid-template-columns:1fr;"><div style="aspect-ratio:16/10">${`<span class="ph">${photo(e,e.id)}</span>`}</div><div class="t"><h3>${e.reg} · ${e.type}</h3><span class="m">${e.n} photo${e.n>1?'s':''} · ${fmt(e.date)}</span></div></button>`:tile(e,`data-open="${e.id}"`,e.n+' photos',e.reg);
+  const cls=S.dir==='a'?'a-list':S.dir==='c'?'c-grid':'a-list';
+  const b=S.dir==='b'?`<div class="a-list">${l.map(e=>`<button data-open="${e.id}" style="border:0;background:#fffaf0;padding:8px 8px 10px;box-shadow:0 2px 6px rgba(0,0,0,.22);transform:rotate(${(e.id%3-1)*1.2}deg);text-align:left"><div style="aspect-ratio:4/3;border:1px solid #d9cfb6"><span class="ph">${photo(e,e.id)}</span></div><div style="font:italic 15px Newsreader;padding-top:6px;color:#2a2418">${e.reg} · ${e.type}</div><div style="font:500 10px 'IBM Plex Mono';color:#7a6f58">${e.n} PHOTOS · ${e.date}</div></button>`).join('')}</div>`:`<div class="${cls}">${l.map(card).join('')}</div>`;
+  return head('Gallery','One gallery per entry. Open a photo to see its details.')+tools(false)+b;
+}
+function viewPub(){
+  const l=pubList();
+  const back=S.profile?`<button class="btn ghost" data-go="pub" data-clear="1">← All photos</button>`:'';
+  const title=S.profile?`@${S.profile}`:'Public Gallery';
+  const sub=S.profile?`${l.length} published photo${l.length===1?'':'s'}`:'Published by everyone. Places show names only, never GPS.';
+  const item=e=>{const u=e.user||'elliot';return `<div style="position:relative;display:flex;flex-direction:column;gap:6px"><button class="${S.dir==='c'?'c-tile':''}" data-open="${e.id}" data-pub="1" style="padding:0;border:0;background:#000;border-radius:var(--r);overflow:hidden;aspect-ratio:${e.ar.replace('3/4','3/4')};width:100%;display:block;margin:0"><span class="ph">${photo(e,e.id)}</span></button><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px"><span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.type}</span><button data-user="${u}" style="border:0;background:none;color:var(--acc2);font-weight:600;padding:0">@${u}</button></div></div>`};
+  return head(title,sub,back)+tools(false)+`<div class="a-list" style="grid-template-columns:repeat(auto-fill,minmax(${S.dir==='c'?200:230}px,1fr))">${l.map(item).join('')||'<div class="empty">No published photos match.</div>'}</div>`;
+}
+function viewAdd(){
+  return head('Add spot','Fill in what you know. Flight details can be autofilled for spots in the last 30 days.')+`<div class="form-wrap"><form class="form" id="f" onsubmit="return false">
+  <label class="full">Aircraft type<input id="f-type" list="types" placeholder="Start typing… Boeing 737-800" value="${S.fr?'Boeing 737-9':''}"><datalist id="types"><option>Boeing 737-800</option><option>Boeing 737-9</option><option>Airbus A320neo</option><option>Airbus A350-900</option></datalist></label>
+  <div class="inl"><label>Flight number<input id="f-flt" placeholder="AS318" value="${S.fr?'AS318':'AS318'}"></label><button class="btn ghost" id="fr" type="button">${S.fr===1?'Looking up…':'Autofill from FR24'}</button></div>
+  <label>Date spotted<input id="f-date" type="date" value="2026-10-12"></label>
+  <label>Registration<input id="f-reg" placeholder="N915AK" value="${S.fr===2?'N915AK':''}"></label>
+  <label>Operator<input id="f-op" list="ops" placeholder="Alaska Airlines" value="${S.fr===2?'Alaska Airlines':''}"><datalist id="ops"><option>Alaska Airlines</option><option>Delta Air Lines</option><option>Qatar Airways</option></datalist></label>
+  <div class="full fr24">${S.fr===2?'<b>Autofilled from FR24</b> · light summary, 1 credit · cached for next time':S.fr===1?'<b>FR24</b> · checking AS318 on Oct 12…':'Lookups cost API credits, so only runs when you tap. Works for the last 30 days.'}</div>
+  <label>From<input id="f-from" placeholder="SEA" value="${S.fr===2?'SEA':''}"></label><label>To<input id="f-to" placeholder="LAX" value="${S.fr===2?'LAX':''}"></label>
+  <div class="full inl"><label>Location<input id="f-loc" placeholder="Search a place or drop a pin" value="Seattle (SEA)"></label><button class="btn ghost" type="button" id="gps">Use my location</button></div>
+  <label class="full">Notes<textarea id="f-notes" placeholder="Livery, runway, light, anything worth remembering"></textarea></label>
+  <div class="full drop">Drop photos here or tap to choose. Photos are resized and thumbnailed for you.<div class="prog" aria-label="Uploading 2 of 3"><i></i></div><div style="font-size:11px;margin-top:4px">Uploading 2 of 3 · you can keep browsing</div></div>
+  <div class="full row"><button class="btn" type="button" id="save">Save spot</button><button class="btn ghost" type="button" data-go="log">Cancel</button></div></form></div>`;
+}
+function viewMap(){
+  const pins=[[22,34,'ANC',2],[38,58,'SEA',3],[34,68,'PDX',1],[36,78,'LAX',1],[48,64,'SLC',1]];
+  return head('Map','Every place you have spotted. Tap a pin to list its entries.')+`<div style="position:relative;aspect-ratio:16/9;min-height:260px;border-radius:var(--r);overflow:hidden;background:linear-gradient(160deg,#20404e,#133040);border:1px solid var(--line)"><svg viewBox="0 0 100 60" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><g fill="none" stroke="rgba(255,255,255,.08)" stroke-width=".2">${Array.from({length:9},(_,i)=>`<path d="M${i*12} 0V60"/>`).join('')}${Array.from({length:6},(_,i)=>`<path d="M0 ${i*12}H100"/>`).join('')}</g></svg>${pins.map(([x,y,n,c])=>`<button data-pin="${n}" style="position:absolute;left:${x}%;top:${y*0.8}%;transform:translate(-50%,-100%);border:0;background:var(--acc);color:#122835;font:700 12px 'DM Sans';border-radius:99px;padding:5px 10px;box-shadow:0 3px 8px rgba(0,0,0,.4)">${n} · ${c}</button>`).join('')}<div style="position:absolute;left:12px;bottom:10px;font-size:11px;color:#9fb2bb">Sample map. The real one uses OpenStreetMap tiles.</div></div>`;
+}
+function viewMe(){
+  const row=(a,b)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)"><span style="color:var(--mute)">${a}</span><b>${b}</b></div>`;
+  return head('Account','You and your data.')+`<div style="max-width:520px">${row('Name','Elliot Mai')}${row('Username','@elliot')}${row('Email','eli.mai12932@gmail.com')}${row('FR24 lookups today','3 of 20')}</div><div class="row"><button class="btn ghost">Update account</button><button class="btn ghost" data-t="Export started">Export all</button><button class="btn danger">Delete account</button></div><div style="font-size:12px;color:var(--mute)"><a href="#" style="color:var(--acc2)">Report a bug or request a feature</a> (opens Ticketbooth)</div>`;
+}
+function sheetHTML(){
+  const s=S.sheet;if(!s)return '';const e=E.find(x=>x.id===s.id),isPub=S.published.has(e.id);
+  const own=(e.user||'elliot')==='elliot';
+  return `<div class="scrim" data-close="1"><div class="sheet" role="dialog" aria-label="${e.type}"><div class="pic"><button class="x" data-close="1" aria-label="Close">×</button><span class="ph" style="height:100%">${photo(e,e.id+s.i)}</span><button class="navb" data-nav="-1" style="left:8px" aria-label="Previous photo">‹</button><button class="navb" data-nav="1" style="right:8px" aria-label="Next photo">›</button></div><div class="body"><div><span class="tag${e.lifer?' new':''}">${e.lifer?'Lifer':e.reg}</span></div><h3>${e.type}</h3><dl class="kv"><dt>Operator</dt><dd>${e.op}</dd><dt>Registration</dt><dd>${e.reg}</dd><dt>Flight</dt><dd>${e.flt}</dd><dt>Route</dt><dd>${e.from} → ${e.to}</dd><dt>Spotted</dt><dd>${fmt(e.date)}</dd><dt>Location</dt><dd>${e.loc}</dd>${e.notes?`<dt>Notes</dt><dd>${e.notes}</dd>`:''}${s.pub?`<dt>By</dt><dd><button data-user="${e.user||'elliot'}" style="border:0;background:none;color:var(--acc2);font-weight:600;padding:0">@${e.user||'elliot'}</button></dd>`:''}<dt>Photo</dt><dd>${s.i+1} of ${e.n}</dd></dl><div class="row" style="margin-top:auto">${s.pub?(own?'<button class="btn danger" data-unpub="1">Unpublish</button>':''):`<button class="btn" data-pubtoggle="1">${isPub?'Unpublish photo':'Publish photo'}</button><button class="btn ghost" data-t="Editing is next">Edit</button><button class="btn ghost" data-t="Export started">Export</button><button class="btn danger" data-t="Delete asks to confirm here">Delete</button>`}</div></div></div></div>`;
+}
+function render(){
+  const app=$('#app');app.dataset.dir=S.dir;
+  const tabs=[['log','Logbook'],['gal','Gallery'],['pub','Public'],['map','Map'],['me','Account']];
+  const brand=`<div class="brand"><i>${LOGO}</i>AeroLogger</div>`;
+  const nav=`<nav class="nav">${tabs.map(([k,l])=>`<button data-go="${k}" ${S.view===k?'aria-current="page"':''}>${l}</button>`).join('')}</nav>`;
+  const bar=`<nav class="tabbar">${tabs.map(([k,l])=>`<button data-go="${k}" ${S.view===k?'aria-current="page"':''}>${ICON[k]}<span>${l}</span></button>`).join('')}</nav>`;
+  const v={log:viewLog,gal:viewGal,pub:viewPub,map:viewMap,me:viewMe,add:viewAdd}[S.view]();
+  const mid=`<div class="main">${v}</div>`;
+  const fab=(S.view==='log'&&S.dir!=='b')?`<button class="btn fab" data-go="add">+ Add spot</button>`:'';
+  app.innerHTML=`<div class="top">${brand}${nav}<div class="me"><span>@elliot</span><span class="av">EM</span></div></div><div class="shell">${mid}${bar}${fab}${S.toast?`<div class="toast" role="status">${S.toast}</div>`:''}${sheetHTML()}</div>`;
+  $('#blurb').innerHTML=BLURBS[S.dir];
+  document.querySelectorAll('#dirSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.dir===S.dir));
+  const q=$('#q');if(q&&S.focusQ){q.focus();q.setSelectionRange(q.value.length,q.value.length);S.focusQ=false}
+}
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-dir],[data-go],[data-open],[data-f],[data-user],[data-close],[data-nav],[data-pubtoggle],[data-unpub],[data-t],[data-pin],#fr,#gps,#save');
+  if(!t)return;
+  if(t.matches('#dirSeg button')){S.dir=t.dataset.dir;S.sheet=null;return render()}
+  if(t.dataset.close){if(ev.target!==t&&t.classList.contains('scrim'))return;S.sheet=null;return render()}
+  if(t.dataset.nav){const e=E.find(x=>x.id===S.sheet.id);S.sheet.i=(S.sheet.i+ +t.dataset.nav+e.n)%e.n;return render()}
+  if(t.dataset.go){S.view=t.dataset.go;if(t.dataset.clear)S.profile=null;if(S.view!=='pub')S.profile=null;S.sheet=null;S.fr=0;return render()}
+  if(t.dataset.open){S.sheet={id:+t.dataset.open,i:0,pub:!!t.dataset.pub};return render()}
+  if(t.dataset.f){S.filt=t.dataset.f;return render()}
+  if(t.dataset.user){S.profile=t.dataset.user;S.view='pub';S.sheet=null;return render()}
+  if(t.dataset.pubtoggle){const id=S.sheet.id;S.published.has(id)?S.published.delete(id):S.published.add(id);return toast(S.published.has(id)?'Published to the public gallery':'Unpublished')}
+  if(t.dataset.unpub){S.published.delete(S.sheet.id);S.sheet=null;return toast('Unpublished')}
+  if(t.dataset.t){return toast(t.dataset.t)}
+  if(t.dataset.pin){S.q=t.dataset.pin;S.view='log';return render()}
+  if(t.id==='fr'){S.fr=1;render();setTimeout(()=>{S.fr=2;render()},900)}
+  if(t.id==='gps'){const el=$('#f-loc');el.value='Seattle (SEA) · from your location';toast('Place name saved. Coordinates stay private.')}
+  if(t.id==='save'){S.view='log';toast('Saved. Photos are finishing in the background.')}
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;S.focusQ=true;render()}});
+document.addEventListener('change',e=>{if(e.target.id==='sort'){S.sort=e.target.value;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet){S.sheet=null;render()}if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.open){e.target.click()}if(S.sheet&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){const x=E.find(z=>z.id===S.sheet.id);S.sheet.i=(S.sheet.i+(e.key==='ArrowRight'?1:-1)+x.n)%x.n;render()}});
+render();
+</script>
