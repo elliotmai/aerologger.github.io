@@ -1,0 +1,5 @@
+# Normalize line endings
+* text=auto
+
+# Keep git hooks LF so the sh shebang works after checkout on Windows
+.githooks/** text eol=lf
