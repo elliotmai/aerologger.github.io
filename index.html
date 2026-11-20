@@ -977,6 +977,8 @@
                         signupPage.style.display = 'none';
                         logbookSection.style.display = 'block';
                         subscribeToLogbooks(user.uid);
+                        // Accounts from before usernames were claimed separately claim theirs now.
+                        db.collection('users').doc(user.uid).get().then(d => d.exists && claimUsername(user.uid, d.data().username)).catch(() => {});
                     } else {
                         alert('Please verify your email before logging in.');
                         auth.signOut();
@@ -1056,7 +1058,7 @@
                                 lastName: lastName,
                                 username: username,
                                 email: email
-                            }).then(() => {
+                            }).then(() => claimUsername(user.uid, username)).then(() => {
                                 signupPage.style.display = 'none';
                                 loginPage.style.display = 'flex';
                             }).catch(error => {
@@ -1929,10 +1931,26 @@
         }
 
         // Validate username in sign-up and account update forms
+        // Usernames are claimed in usernames/{lowercased name} → { uid }, so the
+        // check never needs to read anyone's profile (profiles are private).
+        const usernameKey = (username) => String(username || '').trim().toLowerCase();
         function validateUsersUsername(username) {
-            return db.collection('users').where('username', '==', username).get().then(snapshot => {
-                return snapshot.empty; // If empty, username is not taken
+            return db.collection('usernames').doc(usernameKey(username)).get().then(doc => {
+                return !doc.exists || (auth.currentUser && doc.data().uid === auth.currentUser.uid);
             });
+        }
+
+        // Claim a username for this account (and let go of the old one).
+        function claimUsername(uid, username, previous) {
+            const key = usernameKey(username);
+            if (!key) return Promise.resolve();
+            const claim = db.collection('usernames').doc(key).get().then(doc => {
+                if (!doc.exists) return db.collection('usernames').doc(key).set({ uid: uid });
+            });
+            const release = previous && usernameKey(previous) !== key
+                ? db.collection('usernames').doc(usernameKey(previous)).delete().catch(() => {})
+                : Promise.resolve();
+            return Promise.all([claim, release]).catch(error => console.warn('Username claim:', error));
         }
 
         // Function to filter logbook entries based on search input and filter dropdown
@@ -2939,6 +2957,7 @@
                         validateUsersUsername(newUsername).then(isValid => {
                             if (isValid) {
                                 updateUserDetails(user, firstName, lastName, newUsername, email);
+                                claimUsername(user.uid, newUsername, currentUsername);
                                 // Call a function to update the username in the public gallery
                                 updatePublicGalleryUsername(user.uid, newUsername);
                             } else {
