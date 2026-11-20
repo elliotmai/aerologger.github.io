@@ -5,12 +5,32 @@ rules_version = '2';
 // these rules, anyone on the internet could read everyone's profile.)
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Who has which username: anyone may look one name up (that's how sign-up
+    // checks it's free), nobody may list them, and a name is claimed or let go
+    // only by its owner.
+    match /usernames/{name} {
+      allow get: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // Photos people chose to publish: everyone sees them; only the publisher
+    // adds, changes or removes theirs.
+    match /publicGallery/{id} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
     // Anything else: nobody.
     match /{document=**} {
       allow read, write: if false;
