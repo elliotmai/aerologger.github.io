@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WHATS_NEW } from '@/config/whatsNew';
 import { APP_KEY } from '@/config/app';
 
@@ -14,6 +14,17 @@ function cmpVersion(a, b) {
     if (x !== y) return x - y;
   }
   return 0;
+}
+
+// True when the app runs inside a frame — Hive shows every app in an iframe
+// and has its own What's New. Reading window.top can throw when the parent is
+// cross-origin; that is a frame too.
+function isEmbedded() {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
 }
 
 
@@ -40,7 +51,21 @@ function unseenEntries() {
  */
 export function WhatsNew() {
   const latest = WHATS_NEW[0];
-  const [entries, setEntries] = useState(unseenEntries);
+  const [unseen] = useState(unseenEntries);
+  // Inside Hive, never show it; Hive shows its own What's New.
+  const [entries, setEntries] = useState(() => (isEmbedded() ? [] : unseen));
+
+  // Record "seen" as soon as it is shown, not only on dismiss: Hive remounts
+  // the app on every open and people go home without tapping close, so a
+  // dismiss-only write let the same update pop up every time.
+  useEffect(() => {
+    if (!unseen.length || !latest) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, latest.version);
+    } catch {
+      /* ignore storage failures */
+    }
+  }, [unseen, latest]);
 
   function dismiss() {
     try {
