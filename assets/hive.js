@@ -115,6 +115,9 @@
         return;
     }
 
+    // Only from the real address: Hive's hop sends a pass back to nowhere else.
+    if (location.origin !== 'https://aero-logger.com') return;
+
     // Signed out (or signed in through Hive, to notice Hive signing out):
     // ask Hive once per visit.
     authKnown.then(function () {
