@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AeroLogger</title>
     <link rel="icon" type="image/png" href="assets/AeroLogger_Logo.png">
+    <script>
+        // Inside Hive's frame: no pinch or double-tap zoom (Hive can't stop a pinch that starts in here).
+        if (window.parent !== window) {
+            document.documentElement.style.touchAction = 'pan-x pan-y';
+            document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
+        }
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -490,6 +497,67 @@
 
         .hidden {
             display: none;
+        }
+        /* Phones, the Fire tablet and Hive's frame. */
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            font-size: 16px; /* 16px+ or iOS zooms in on focus */
+        }
+
+        header h1 {
+            padding: 0 calc(5% + 36px); /* keep the title clear of the menu button */
+        }
+
+        .logbook-header,
+        .gallery-header,
+        .public-gallery-header,
+        .logbook-order-header,
+        .gallery-order-header {
+            flex-wrap: wrap;
+        }
+
+        @media screen and (max-width: 800px) {
+            .modal-content {
+                width: auto;
+                margin: 16px;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .container {
+                width: auto;
+                margin: 12px;
+                padding: 12px;
+            }
+
+            #logbookSearchBar,
+            #gallerySearchBar,
+            #publicGallerySearchBar {
+                width: auto;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .gallery-photos {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .public-gallery-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            /* The menu slides over the page instead of squeezing it sideways. */
+            body.sidebar-open {
+                margin-left: 0;
+            }
         }
     </style>
 
